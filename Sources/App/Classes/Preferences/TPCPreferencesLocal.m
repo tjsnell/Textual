@@ -218,8 +218,12 @@ NSUInteger const TPCPreferencesDictionaryVersion = 602;
 + (BOOL)enableEchoMessageCapability
 {
 //	return [RZUserDefaults() boolForKey:@"IRC -> Enable echo-message Capability"];
-	
-	return NO;
+
+	/* Enabled so that connections which echo sent messages back (e.g. bouncers
+	 such as soju/ZNC) are deduplicated: with the capability negotiated, Textual
+	 suppresses its local echo and renders the server's echo once instead of
+	 printing both. Servers that do not advertise echo-message are unaffected. */
+	return YES;
 }
 
 + (BOOL)displayServerMOTD
