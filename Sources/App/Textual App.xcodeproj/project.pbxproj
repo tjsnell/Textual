@@ -1243,6 +1243,8 @@
 		4CEFEDAC22B4AF42002CEE19 /* TDCPreferencesUserStyleSheetPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4CB873D622B4A497005AB046 /* TDCPreferencesUserStyleSheetPrivate.h */; };
 		4CEFEDB122B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CEFEDAE22B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings */; };
 		4CEFEDB222B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CEFEDAE22B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings */; };
+		89AAE9B6EE3D6C963D83E1A6 /* TXImageUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */; };
+		A43244781017A1271FD3E595 /* TXImageUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1401,6 +1403,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		253D97B3988D4A8E0D29A8DD /* TXImageUploader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = TXImageUploader.h; path = Classes/Headers/TXImageUploader.h; sourceTree = "<group>"; };
 		4C06E13A20EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerPropertiesSheet.xib; sourceTree = "<group>"; };
 		4C06E13E20EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerHighlightListSheet.xib; sourceTree = "<group>"; };
 		4C06E14020EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerEndpointListSheet.xib; sourceTree = "<group>"; };
@@ -2050,6 +2053,7 @@
 		5D9B8EB6170A0EB400919CB0 /* BuildFrameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = BuildFrameworks.sh; path = "Build Scripts/BuildFrameworks.sh"; sourceTree = "<group>"; };
 		5D9B8EB8170A0EB400919CB0 /* UpdateVersionInfo.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = UpdateVersionInfo.sh; path = "Build Scripts/UpdateVersionInfo.sh"; sourceTree = "<group>"; };
 		5D9B8EB9170A10F200919CB0 /* BuildExtensions.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = BuildExtensions.sh; path = "Build Scripts/BuildExtensions.sh"; sourceTree = "<group>"; };
+		8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = TXImageUploader.m; path = Classes/Library/TXImageUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2462,6 +2466,7 @@
 				4C31515720EB673E00448776 /* TLOSpeechSynthesizer.m */,
 				4C31515A20EB673E00448776 /* TLOSpokenNotification.m */,
 				4C06E29320EC4F570055D09A /* TLOTimer.m */,
+				8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -2605,6 +2610,7 @@
 				4C31517A20EB673E00448776 /* TXMasterController.h */,
 				4C31519B20EB673E00448776 /* TXMenuController.h */,
 				4C31516B20EB673E00448776 /* TXSharedApplication.h */,
+				253D97B3988D4A8E0D29A8DD /* TXImageUploader.h */,
 			);
 			path = Headers;
 			sourceTree = "<group>";
@@ -4805,6 +4811,7 @@
 				4C06E63620EC553A0055D09A /* TVCContentNavigationOutlineView.m in Sources */,
 				4CB873DD22B4A56B005AB046 /* TDCPreferencesUserStyleSheet.m in Sources */,
 				4C06E63720EC553A0055D09A /* TVCDockIcon.m in Sources */,
+				A43244781017A1271FD3E595 /* TXImageUploader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4989,6 +4996,7 @@
 				4C06E6EF20EC55B90055D09A /* TVCContentNavigationOutlineView.m in Sources */,
 				4CB873DE22B4A56B005AB046 /* TDCPreferencesUserStyleSheet.m in Sources */,
 				4C06E6F020EC55B90055D09A /* TVCDockIcon.m in Sources */,
+				89AAE9B6EE3D6C963D83E1A6 /* TXImageUploader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
