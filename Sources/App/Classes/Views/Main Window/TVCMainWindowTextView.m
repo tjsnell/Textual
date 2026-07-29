@@ -95,8 +95,6 @@ NS_ASSUME_NONNULL_BEGIN
 	self.backgroundColor = [NSColor clearColor];
 
 	[self updateTextDirection];
-
-	[self registerImageDragTypes];
 }
 
 - (void)viewDidMoveToWindow
@@ -333,8 +331,10 @@ NS_ASSUME_NONNULL_BEGIN
 {
 	self.imageUploadCounter += 1;
 
+	NSUInteger uploadNumber = self.imageUploadCounter;
+
 	NSString *token = [NSString stringWithFormat:@"[uploading image #%lu…]",
-		(unsigned long)self.imageUploadCounter];
+		(unsigned long)uploadNumber];
 
 	/* Insert the token at the current caret position. */
 	if ([self shouldChangeTextInRange:self.selectedRange replacementString:token]) {
@@ -362,14 +362,16 @@ NS_ASSUME_NONNULL_BEGIN
 		if (url != nil) {
 			[strongSelf replaceToken:token withString:url appendIfMissing:YES];
 		} else {
-			NSString *failure = @"[image upload failed]";
+			NSString *failure = [NSString stringWithFormat:@"[image #%lu upload failed]",
+				(unsigned long)uploadNumber];
 
 			[strongSelf replaceToken:token withString:failure appendIfMissing:NO];
 
-			/* Auto-clear the failure note after 5 seconds. */
+			/* Auto-clear the failure note after 5 seconds. Re-strongify weakly so
+			 the delayed block does not keep a dead view alive. */
 			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
 			               dispatch_get_main_queue(), ^{
-				[strongSelf replaceToken:failure withString:@"" appendIfMissing:NO];
+				[weakSelf replaceToken:failure withString:@"" appendIfMissing:NO];
 			});
 		}
 	}];
@@ -391,38 +393,44 @@ NS_ASSUME_NONNULL_BEGIN
 			[self.textStorage replaceCharactersInRange:range withString:replacement];
 
 			[self didChangeText];
+
+			return;
 		}
 
-		return;
+		/* Change was refused; fall through to the append fallback so a URL is
+		 not silently lost. */
 	}
 
 	if (appendIfMissing && replacement.length > 0) {
 		NSString *separator = (current.length > 0 && [current hasSuffix:@" "] == NO) ? @" " : @"";
 
-		self.stringValue = [current stringByAppendingFormat:@"%@%@", separator, replacement];
+		NSString *appended = [separator stringByAppendingString:replacement];
+
+		NSRange endRange = NSMakeRange(current.length, 0);
+
+		/* Append via textStorage (not setStringValue:) to preserve any IRC
+		 rich-text formatting the user already typed. */
+		if ([self shouldChangeTextInRange:endRange replacementString:appended]) {
+			[self.textStorage replaceCharactersInRange:endRange withString:appended];
+
+			[self didChangeText];
+		}
 	}
 }
 
 #pragma mark -
 #pragma mark Drag and Drop
 
-/* Adds image drag types WITHOUT clobbering the NSTextView built-in types
- (so dragging text into the field still works). */
-- (void)registerImageDragTypes
+/* NSTextView derives its registered dragged types from acceptableDragTypes and
+ re-registers on its own schedule, so we union our image types here rather than
+ calling registerForDraggedTypes: once. */
+- (NSArray<NSPasteboardType> *)acceptableDragTypes
 {
-	NSArray<NSPasteboardType> *imageTypes = @[
+	return [[super acceptableDragTypes] arrayByAddingObjectsFromArray:@[
 		NSPasteboardTypePNG,
 		NSPasteboardTypeTIFF,
 		NSPasteboardTypeFileURL
-	];
-
-	NSArray<NSPasteboardType> *existing = self.registeredDraggedTypes;
-
-	if (existing.count > 0) {
-		[self registerForDraggedTypes:[existing arrayByAddingObjectsFromArray:imageTypes]];
-	} else {
-		[self registerForDraggedTypes:imageTypes];
-	}
+	]];
 }
 
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender
