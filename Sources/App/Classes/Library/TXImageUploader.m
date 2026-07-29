@@ -34,7 +34,32 @@ NS_ASSUME_NONNULL_BEGIN
                                 statusCode:(NSInteger)statusCode
                                      error:(NSError * _Nullable * _Nullable)error
 {
-	return nil; // implemented in Task 2
+	NSString * (^makeError)(NSString *) = ^NSString * _Nullable (NSString *message) {
+		if (error) {
+			*error = [NSError errorWithDomain:@"TXImageUploaderErrorDomain"
+			                             code:statusCode
+			                         userInfo:@{NSLocalizedDescriptionKey: message}];
+		}
+		return nil;
+	};
+
+	if (statusCode != 200) {
+		return makeError([NSString stringWithFormat:@"Server returned status %ld", (long)statusCode]);
+	}
+
+	if (data.length == 0) {
+		return makeError(@"Empty response from server");
+	}
+
+	NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	NSString *trimmed = [body stringByTrimmingCharactersInSet:
+		[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+	if ([trimmed hasPrefix:@"https://"] == NO) {
+		return makeError(trimmed.length ? trimmed : @"Unexpected response from server");
+	}
+
+	return trimmed;
 }
 
 - (void)uploadImageData:(NSData *)data
