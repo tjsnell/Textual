@@ -1403,7 +1403,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		253D97B3988D4A8E0D29A8DD /* TXImageUploader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = TXImageUploader.h; path = Classes/Headers/TXImageUploader.h; sourceTree = "<group>"; };
+		253D97B3988D4A8E0D29A8DD /* TXImageUploader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = TXImageUploader.h; path = TXImageUploader.h; sourceTree = "<group>"; };
 		4C06E13A20EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerPropertiesSheet.xib; sourceTree = "<group>"; };
 		4C06E13E20EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerHighlightListSheet.xib; sourceTree = "<group>"; };
 		4C06E14020EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerEndpointListSheet.xib; sourceTree = "<group>"; };
@@ -2053,7 +2053,7 @@
 		5D9B8EB6170A0EB400919CB0 /* BuildFrameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = BuildFrameworks.sh; path = "Build Scripts/BuildFrameworks.sh"; sourceTree = "<group>"; };
 		5D9B8EB8170A0EB400919CB0 /* UpdateVersionInfo.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = UpdateVersionInfo.sh; path = "Build Scripts/UpdateVersionInfo.sh"; sourceTree = "<group>"; };
 		5D9B8EB9170A10F200919CB0 /* BuildExtensions.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = BuildExtensions.sh; path = "Build Scripts/BuildExtensions.sh"; sourceTree = "<group>"; };
-		8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = TXImageUploader.m; path = Classes/Library/TXImageUploader.m; sourceTree = "<group>"; };
+		8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = TXImageUploader.m; path = TXImageUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
