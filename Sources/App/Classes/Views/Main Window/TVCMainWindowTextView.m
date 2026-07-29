@@ -46,6 +46,7 @@
 #import "TVCTextViewWithIRCFormatterPrivate.h"
 #import "TVCMainWindowTextViewAppearancePrivate.h"
 #import "TVCMainWindowTextViewPrivate.h"
+#import "TXImageUploader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -69,6 +70,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet TVCMainWindowSegmentedControllerCell *segmentedControllerCell;
 @property (nonatomic, strong) TVCMainWindowTextViewAppearance *userInterfaceObjects;
 @property (readonly) NSArray<NSString *> *defaultSpellingIgnores;
+@property (nonatomic, strong, nullable) TXImageUploader *imageUploader;
+@property (nonatomic, assign) NSUInteger imageUploadCounter;
 @end
 
 @interface TVCMainWindowTextViewBackground ()
@@ -242,6 +245,83 @@ NS_ASSUME_NONNULL_BEGIN
 	[super textDidChange:aNotification];
 
 	[self recalculateTextViewSize];
+}
+
+#pragma mark -
+#pragma mark Image Upload
+
+/* Returns PNG data for the first image found on the pasteboard, or nil.
+ Handles both raw image data (e.g. a screenshot) and dropped/copied image files. */
+- (nullable NSData *)pngImageDataFromPasteboard:(NSPasteboard *)pasteboard
+{
+	/* 1. Direct image data (e.g. a screenshot copied to the clipboard). */
+	if ([NSImage canInitWithPasteboard:pasteboard]) {
+		NSImage *image = [[NSImage alloc] initWithPasteboard:pasteboard];
+
+		NSData *png = [self pngDataFromImage:image];
+
+		if (png != nil) {
+			return png;
+		}
+	}
+
+	/* 2. A dragged or copied image file. Filtered to URLs whose contents conform
+	 to image types this app can read, so non-image files fall through. */
+	NSDictionary<NSPasteboardReadingOptionKey, id> *options = @{
+		NSPasteboardURLReadingFileURLsOnlyKey: @YES,
+		NSPasteboardURLReadingContentsConformToTypesKey: [NSImage imageTypes]
+	};
+
+	NSArray<NSURL *> *urls = [pasteboard readObjectsForClasses:@[[NSURL class]] options:options];
+
+	for (NSURL *url in urls) {
+		NSImage *fileImage = [[NSImage alloc] initWithContentsOfURL:url];
+
+		NSData *png = [self pngDataFromImage:fileImage];
+
+		if (png != nil) {
+			return png;
+		}
+	}
+
+	return nil;
+}
+
+/* Lightweight check (no image decoding) used for drag-hover feedback. */
+- (BOOL)pasteboardContainsImage:(NSPasteboard *)pasteboard
+{
+	if ([pasteboard canReadObjectForClasses:@[[NSImage class]] options:@{}]) {
+		return YES;
+	}
+
+	NSDictionary<NSPasteboardReadingOptionKey, id> *options = @{
+		NSPasteboardURLReadingFileURLsOnlyKey: @YES,
+		NSPasteboardURLReadingContentsConformToTypesKey: [NSImage imageTypes]
+	};
+
+	return [pasteboard canReadObjectForClasses:@[[NSURL class]] options:options];
+}
+
+/* Re-encodes an NSImage as PNG data. */
+- (nullable NSData *)pngDataFromImage:(nullable NSImage *)image
+{
+	if (image == nil) {
+		return nil;
+	}
+
+	NSData *tiff = image.TIFFRepresentation;
+
+	if (tiff == nil) {
+		return nil;
+	}
+
+	NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithData:tiff];
+
+	if (rep == nil) {
+		return nil;
+	}
+
+	return [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
 }
 
 - (void)paste:(nullable id)sender
