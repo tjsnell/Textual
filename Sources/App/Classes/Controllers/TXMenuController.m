@@ -54,6 +54,7 @@
 #import "TVCMainWindowPrivate.h"
 #import "TVCMainWindowSplitView.h"
 #import "TVCMainWindowTextView.h"
+#import "TVCMainWindowTextViewPrivate.h"
 #import "TLOEncryptionManagerPrivate.h"
 #import "TLOLicenseManagerPrivate.h"
 #import "TLOLocalization.h"
@@ -466,12 +467,24 @@ NS_ASSUME_NONNULL_BEGIN
 		{
 			NSString *currentPasteboard = RZPasteboard().stringContent;
 
-			if (currentPasteboard.length == 0) {
-				return NO;
-			}
+			BOOL pasteboardHasText = (currentPasteboard.length > 0);
 
 			if (mainWindow().keyWindow) {
+				/* The main input field also accepts images (uploaded on paste),
+				 so enable Paste when the clipboard holds an image even without
+				 text. Keeps the keyboard (Cmd-V) path in sync with the text
+				 view's own context-menu validation. */
+				if (pasteboardHasText == NO &&
+					[mainWindowTextField() pasteboardContainsImage:RZPasteboard()] == NO)
+				{
+					return NO;
+				}
+
 				return mainWindowTextField().editable;
+			}
+
+			if (pasteboardHasText == NO) {
+				return NO;
 			}
 
 			id firstResponder = [NSApp keyWindow].firstResponder;

@@ -48,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateTextDirection;
 
+/* Cheap check (no image decoding) for whether the pasteboard holds an image the
+ input field can upload. Used by paste-menu validation and drag feedback. */
+- (BOOL)pasteboardContainsImage:(NSPasteboard *)pasteboard;
+
 - (void)updateTextBasedOnPreferredFontSize;
 
 - (void)updateSegmentedController;

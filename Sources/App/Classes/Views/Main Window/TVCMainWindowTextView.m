@@ -457,6 +457,20 @@ NS_ASSUME_NONNULL_BEGIN
 	]];
 }
 
+/* Advertise the image types as pasteable too. Without this, NSTextView disables
+ the Paste command (and beeps) for an image-only clipboard, so -paste: would
+ never be called. The superclass keeps NSPasteboardTypeString first, so a normal
+ text paste — and the text portion of a mixed paste via [super paste:] — still
+ reads the string first; the image types only serve to enable the command. */
+- (NSArray<NSPasteboardType> *)readablePasteboardTypes
+{
+	return [[super readablePasteboardTypes] arrayByAddingObjectsFromArray:@[
+		NSPasteboardTypePNG,
+		NSPasteboardTypeTIFF,
+		NSPasteboardTypeFileURL
+	]];
+}
+
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender
 {
 	if ([self pasteboardContainsImage:sender.draggingPasteboard]) {
