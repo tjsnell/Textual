@@ -2,8 +2,24 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, TXImageUploaderError) {
+	TXImageUploaderErrorBadResponse = -1000
+};
+
+static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nullable error,
+                                                    NSInteger code,
+                                                    NSString *message) {
+	if (error) {
+		*error = [NSError errorWithDomain:@"TXImageUploaderErrorDomain"
+		                             code:code
+		                         userInfo:@{NSLocalizedDescriptionKey: message}];
+	}
+	return nil;
+}
+
 @implementation TXImageUploader
 
+/* Caller must pass a header-safe filename (no quotes or CRLF). */
 + (NSData *)multipartBodyForImageData:(NSData *)data
                              filename:(NSString *)filename
                              boundary:(NSString *)boundary
@@ -34,21 +50,14 @@ NS_ASSUME_NONNULL_BEGIN
                                 statusCode:(NSInteger)statusCode
                                      error:(NSError * _Nullable * _Nullable)error
 {
-	NSString * (^makeError)(NSString *) = ^NSString * _Nullable (NSString *message) {
-		if (error) {
-			*error = [NSError errorWithDomain:@"TXImageUploaderErrorDomain"
-			                             code:statusCode
-			                         userInfo:@{NSLocalizedDescriptionKey: message}];
-		}
-		return nil;
-	};
-
 	if (statusCode != 200) {
-		return makeError([NSString stringWithFormat:@"Server returned status %ld", (long)statusCode]);
+		return TXImageUploaderSetError(error, statusCode,
+			[NSString stringWithFormat:@"Server returned status %ld", (long)statusCode]);
 	}
 
 	if (data.length == 0) {
-		return makeError(@"Empty response from server");
+		return TXImageUploaderSetError(error, TXImageUploaderErrorBadResponse,
+			@"Empty response from server");
 	}
 
 	NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
@@ -56,7 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
 		[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
 	if ([trimmed hasPrefix:@"https://"] == NO) {
-		return makeError(trimmed.length ? trimmed : @"Unexpected response from server");
+		return TXImageUploaderSetError(error, TXImageUploaderErrorBadResponse,
+			trimmed.length ? trimmed : @"Unexpected response from server");
 	}
 
 	return trimmed;
