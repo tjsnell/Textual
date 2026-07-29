@@ -95,6 +95,8 @@ NS_ASSUME_NONNULL_BEGIN
 	self.backgroundColor = [NSColor clearColor];
 
 	[self updateTextDirection];
+
+	[self registerImageDragTypes];
 }
 
 - (void)viewDidMoveToWindow
@@ -399,6 +401,61 @@ NS_ASSUME_NONNULL_BEGIN
 
 		self.stringValue = [current stringByAppendingFormat:@"%@%@", separator, replacement];
 	}
+}
+
+#pragma mark -
+#pragma mark Drag and Drop
+
+/* Adds image drag types WITHOUT clobbering the NSTextView built-in types
+ (so dragging text into the field still works). */
+- (void)registerImageDragTypes
+{
+	NSArray<NSPasteboardType> *imageTypes = @[
+		NSPasteboardTypePNG,
+		NSPasteboardTypeTIFF,
+		NSPasteboardTypeFileURL
+	];
+
+	NSArray<NSPasteboardType> *existing = self.registeredDraggedTypes;
+
+	if (existing.count > 0) {
+		[self registerForDraggedTypes:[existing arrayByAddingObjectsFromArray:imageTypes]];
+	} else {
+		[self registerForDraggedTypes:imageTypes];
+	}
+}
+
+- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender
+{
+	if ([self pasteboardContainsImage:sender.draggingPasteboard]) {
+		return NSDragOperationCopy;
+	}
+
+	return [super draggingEntered:sender];
+}
+
+- (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender
+{
+	if ([self pasteboardContainsImage:sender.draggingPasteboard]) {
+		return NSDragOperationCopy;
+	}
+
+	return [super draggingUpdated:sender];
+}
+
+- (BOOL)performDragOperation:(id<NSDraggingInfo>)sender
+{
+	NSData *png = [self pngImageDataFromPasteboard:sender.draggingPasteboard];
+
+	if (png != nil) {
+		[self uploadPNGImageData:png];
+
+		[self recalculateTextViewSize];
+
+		return YES;
+	}
+
+	return [super performDragOperation:sender];
 }
 
 - (void)paste:(nullable id)sender
