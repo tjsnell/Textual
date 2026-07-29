@@ -324,6 +324,83 @@ NS_ASSUME_NONNULL_BEGIN
 	return [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
 }
 
+/* Inserts a placeholder token at the caret, uploads the image, and swaps the
+ token for the resulting URL (or an auto-clearing failure note). No message is
+ ever sent automatically — the URL only lands in the input field. */
+- (void)uploadPNGImageData:(NSData *)pngData
+{
+	self.imageUploadCounter += 1;
+
+	NSString *token = [NSString stringWithFormat:@"[uploading image #%lu…]",
+		(unsigned long)self.imageUploadCounter];
+
+	/* Insert the token at the current caret position. */
+	if ([self shouldChangeTextInRange:self.selectedRange replacementString:token]) {
+		[self.textStorage replaceCharactersInRange:self.selectedRange withString:token];
+
+		[self didChangeText];
+	}
+
+	if (self.imageUploader == nil) {
+		self.imageUploader = [TXImageUploader new];
+	}
+
+	__weak TVCMainWindowTextView *weakSelf = self;
+
+	[self.imageUploader uploadImageData:pngData
+	                          filename:@"image.png"
+	                        completion:^(NSString * _Nullable url, NSError * _Nullable error)
+	{
+		TVCMainWindowTextView *strongSelf = weakSelf;
+
+		if (strongSelf == nil) {
+			return;
+		}
+
+		if (url != nil) {
+			[strongSelf replaceToken:token withString:url appendIfMissing:YES];
+		} else {
+			NSString *failure = @"[image upload failed]";
+
+			[strongSelf replaceToken:token withString:failure appendIfMissing:NO];
+
+			/* Auto-clear the failure note after 5 seconds. */
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
+			               dispatch_get_main_queue(), ^{
+				[strongSelf replaceToken:failure withString:@"" appendIfMissing:NO];
+			});
+		}
+	}];
+}
+
+/* Replaces the first occurrence of token in the field. If not found and
+ appendIfMissing is YES, appends replacement to the end instead (so a URL is
+ never lost if the user edited the placeholder away). */
+- (void)replaceToken:(NSString *)token
+          withString:(NSString *)replacement
+     appendIfMissing:(BOOL)appendIfMissing
+{
+	NSString *current = self.stringValue;
+
+	NSRange range = [current rangeOfString:token];
+
+	if (range.location != NSNotFound) {
+		if ([self shouldChangeTextInRange:range replacementString:replacement]) {
+			[self.textStorage replaceCharactersInRange:range withString:replacement];
+
+			[self didChangeText];
+		}
+
+		return;
+	}
+
+	if (appendIfMissing && replacement.length > 0) {
+		NSString *separator = (current.length > 0 && [current hasSuffix:@" "] == NO) ? @" " : @"";
+
+		self.stringValue = [current stringByAppendingFormat:@"%@%@", separator, replacement];
+	}
+}
+
 - (void)paste:(nullable id)sender
 {
 	[super paste:self];
