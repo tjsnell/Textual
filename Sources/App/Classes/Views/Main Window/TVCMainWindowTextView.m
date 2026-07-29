@@ -250,23 +250,19 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 #pragma mark Image Upload
 
-/* Returns PNG data for the first image found on the pasteboard, or nil.
- Handles both raw image data (e.g. a screenshot) and dropped/copied image files. */
-- (nullable NSData *)pngImageDataFromPasteboard:(NSPasteboard *)pasteboard
+/* Returns the first image found on the pasteboard (raw image data such as a
+ screenshot, or a dropped/copied image file), or nil. Cheap enough for the main
+ thread — the expensive PNG normalization is deferred to +pngDataFromImage:. */
+- (nullable NSImage *)imageFromPasteboard:(NSPasteboard *)pasteboard
 {
-	/* 1. Direct image data (e.g. a screenshot copied to the clipboard). */
 	if ([NSImage canInitWithPasteboard:pasteboard]) {
 		NSImage *image = [[NSImage alloc] initWithPasteboard:pasteboard];
 
-		NSData *png = [self pngDataFromImage:image];
-
-		if (png != nil) {
-			return png;
+		if (image != nil) {
+			return image;
 		}
 	}
 
-	/* 2. A dragged or copied image file. Filtered to URLs whose contents conform
-	 to image types this app can read, so non-image files fall through. */
 	NSDictionary<NSPasteboardReadingOptionKey, id> *options = @{
 		NSPasteboardURLReadingFileURLsOnlyKey: @YES,
 		NSPasteboardURLReadingContentsConformToTypesKey: [NSImage imageTypes]
@@ -275,12 +271,10 @@ NS_ASSUME_NONNULL_BEGIN
 	NSArray<NSURL *> *urls = [pasteboard readObjectsForClasses:@[[NSURL class]] options:options];
 
 	for (NSURL *url in urls) {
-		NSImage *fileImage = [[NSImage alloc] initWithContentsOfURL:url];
+		NSImage *image = [[NSImage alloc] initWithContentsOfURL:url];
 
-		NSData *png = [self pngDataFromImage:fileImage];
-
-		if (png != nil) {
-			return png;
+		if (image != nil) {
+			return image;
 		}
 	}
 
@@ -302,8 +296,8 @@ NS_ASSUME_NONNULL_BEGIN
 	return [pasteboard canReadObjectForClasses:@[[NSURL class]] options:options];
 }
 
-/* Re-encodes an NSImage as PNG data. */
-- (nullable NSData *)pngDataFromImage:(nullable NSImage *)image
+/* Re-encodes an NSImage as PNG data. Safe to call off the main thread. */
++ (nullable NSData *)pngDataFromImage:(nullable NSImage *)image
 {
 	if (image == nil) {
 		return nil;
@@ -327,7 +321,11 @@ NS_ASSUME_NONNULL_BEGIN
 /* Inserts a placeholder token at the caret, uploads the image, and swaps the
  token for the resulting URL (or an auto-clearing failure note). No message is
  ever sent automatically — the URL only lands in the input field. */
-- (void)uploadPNGImageData:(NSData *)pngData
+/* Inserts a placeholder token at the caret immediately, then normalizes the
+ image to PNG and uploads it OFF the main thread, swapping the token for the
+ resulting URL (or an auto-clearing failure note). No message is ever sent
+ automatically — the URL only lands in the input field. */
+- (void)uploadImage:(NSImage *)image
 {
 	self.imageUploadCounter += 1;
 
@@ -336,7 +334,8 @@ NS_ASSUME_NONNULL_BEGIN
 	NSString *token = [NSString stringWithFormat:@"[uploading image #%lu…]",
 		(unsigned long)uploadNumber];
 
-	/* Insert the token at the current caret position. */
+	/* Insert the placeholder immediately (main thread) so the UI stays responsive
+	 even while a large image is being normalized. */
 	if ([self shouldChangeTextInRange:self.selectedRange replacementString:token]) {
 		[self.textStorage replaceCharactersInRange:self.selectedRange withString:token];
 
@@ -349,32 +348,58 @@ NS_ASSUME_NONNULL_BEGIN
 
 	__weak TVCMainWindowTextView *weakSelf = self;
 
-	[self.imageUploader uploadImageData:pngData
-	                          filename:@"image.png"
-	                        completion:^(NSString * _Nullable url, NSError * _Nullable error)
-	{
-		TVCMainWindowTextView *strongSelf = weakSelf;
+	/* Normalize to PNG off the main thread; encoding a large bitmap can be slow. */
+	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+		NSData *pngData = [TVCMainWindowTextView pngDataFromImage:image];
 
-		if (strongSelf == nil) {
-			return;
-		}
+		dispatch_async(dispatch_get_main_queue(), ^{
+			TVCMainWindowTextView *strongSelf = weakSelf;
 
-		if (url != nil) {
-			[strongSelf replaceToken:token withString:url appendIfMissing:YES];
-		} else {
-			NSString *failure = [NSString stringWithFormat:@"[image #%lu upload failed]",
-				(unsigned long)uploadNumber];
+			if (strongSelf == nil) {
+				return;
+			}
 
-			[strongSelf replaceToken:token withString:failure appendIfMissing:NO];
+			if (pngData == nil) {
+				[strongSelf failImageUpload:uploadNumber replacingToken:token];
 
-			/* Auto-clear the failure note after 5 seconds. Re-strongify weakly so
-			 the delayed block does not keep a dead view alive. */
-			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
-			               dispatch_get_main_queue(), ^{
-				[weakSelf replaceToken:failure withString:@"" appendIfMissing:NO];
-			});
-		}
-	}];
+				return;
+			}
+
+			[strongSelf.imageUploader uploadImageData:pngData
+			                                filename:@"image.png"
+			                              completion:^(NSString * _Nullable url, NSError * _Nullable error)
+			{
+				TVCMainWindowTextView *innerSelf = weakSelf;
+
+				if (innerSelf == nil) {
+					return;
+				}
+
+				if (url != nil) {
+					[innerSelf replaceToken:token withString:url appendIfMissing:YES];
+				} else {
+					[innerSelf failImageUpload:uploadNumber replacingToken:token];
+				}
+			}];
+		});
+	});
+}
+
+/* Replaces the upload placeholder with a counter-tagged failure note that clears
+ itself after a few seconds. Main thread only. */
+- (void)failImageUpload:(NSUInteger)uploadNumber replacingToken:(NSString *)token
+{
+	NSString *failure = [NSString stringWithFormat:@"[image #%lu upload failed]",
+		(unsigned long)uploadNumber];
+
+	[self replaceToken:token withString:failure appendIfMissing:NO];
+
+	__weak TVCMainWindowTextView *weakSelf = self;
+
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
+	               dispatch_get_main_queue(), ^{
+		[weakSelf replaceToken:failure withString:@"" appendIfMissing:NO];
+	});
 }
 
 /* Replaces the first occurrence of token in the field. If not found and
@@ -453,10 +478,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender
 {
-	NSData *png = [self pngImageDataFromPasteboard:sender.draggingPasteboard];
+	NSPasteboard *pasteboard = sender.draggingPasteboard;
 
-	if (png != nil) {
-		[self uploadPNGImageData:png];
+	NSImage *image = [self imageFromPasteboard:pasteboard];
+
+	if (image != nil) {
+		/* Do both: if the drag also carries text, let super insert it too. */
+		if ([pasteboard availableTypeFromArray:@[NSPasteboardTypeString]] != nil) {
+			[super performDragOperation:sender];
+		}
+
+		[self uploadImage:image];
 
 		[self recalculateTextViewSize];
 
@@ -468,17 +500,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)paste:(nullable id)sender
 {
-	NSData *png = [self pngImageDataFromPasteboard:[NSPasteboard generalPasteboard]];
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 
-	if (png != nil) {
-		[self uploadPNGImageData:png];
+	NSImage *image = [self imageFromPasteboard:pasteboard];
 
-		[self recalculateTextViewSize];
+	BOOL hasText = ([pasteboard availableTypeFromArray:@[NSPasteboardTypeString]] != nil);
 
-		return;
+	/* Do both: when the pasteboard also carries text, paste the text normally and
+	 also upload the image. Image types are NOT in readablePasteboardTypes, so
+	 super never inserts the image itself. With no image this is a normal paste. */
+	if (image == nil || hasText) {
+		[super paste:self];
 	}
 
-	[super paste:self];
+	if (image != nil) {
+		[self uploadImage:image];
+	}
 
 	[self recalculateTextViewSize];
 }
