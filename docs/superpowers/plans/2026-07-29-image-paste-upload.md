@@ -788,3 +788,19 @@ Invoke the `superpowers:finishing-a-development-branch` skill to decide how to i
 - **No auto-send** is enforced structurally: the URL only ever lands in the input field; sending remains a manual Enter press. No task posts to a channel.
 - **catbox permanent uploads only**; the host URL and `reqtype` are the single seam (in `TXImageUploader.m` / the pure body builder) for adding litterbox/expiry or an alternate host later.
 - **All images normalized to PNG**; JPEG passthrough is a possible later refinement, not in v1.
+
+## Implementation deviations from the literal plan (as-built)
+
+These improvements were made during execution and supersede the corresponding code in Tasks 5/8 above:
+
+1. **Image-file detection (Task 5):** instead of `CoreServices`/`kUTType`/`UTTypeConformsTo` (deprecated on the 12.0 deployment target), the as-built code uses `+[NSImage canInitWithPasteboard:]` for raw image data and `readObjectsForClasses:` with `NSPasteboardURLReadingContentsConformToTypesKey: [NSImage imageTypes]` to filter dropped files to image types. No `CoreServices` import; warning-free.
+2. **Drag-type registration (Task 8):** instead of a one-shot `registerForDraggedTypes:` in `awakeFromNib` (which NSTextView can wipe when it re-derives its registered types from `acceptableDragTypes`), the as-built code overrides `-acceptableDragTypes` to union `NSPasteboardTypePNG/TIFF/FileURL` onto `[super acceptableDragTypes]`. A cheap `-pasteboardContainsImage:` (via `canReadObjectForClasses:`) provides drag-hover feedback without decoding the image.
+3. **pbxproj registration (Task 4):** done with the `xcodeproj` ruby gem, registering `TXImageUploader.m` in BOTH app targets (`Textual (Debug)` and `Textual (Standard Release)`). An initial doubled-path bug (group-prefixed ref path inside an already-rooted group) was caught by a full build and fixed to group-relative basenames.
+4. **Post-review hardening:** failure notes are counter-tagged (`[image #N upload failed]`) so concurrent failures don't cross-clear; the append fallback preserves IRC rich-text formatting (uses `textStorage`, not `setStringValue:`); the delayed clear captures `weakSelf` so it doesn't pin a dead view.
+
+## Verification performed (Task 9)
+
+- Full app build via `xcodebuild -scheme "Textual (Debug)" CODE_SIGNING_ALLOWED=NO`: **BUILD SUCCEEDED**, zero errors/warnings on the changed files.
+- Offline unit tests for the pure helpers: 10/10 pass.
+- **Live end-to-end** upload of a 1×1 PNG through `TXImageUploader` against the real catbox.moe API returned `https://files.catbox.moe/vbzbpi.png`; the file was re-downloaded and byte-count matched (70/70), confirming the multipart format and response parsing work against the live service.
+- Remaining manual GUI verification (paste a screenshot / drag a file into a live channel, observe placeholder→URL swap, failure path, two concurrent pastes) requires the user's signed Xcode build + a live IRC connection.
