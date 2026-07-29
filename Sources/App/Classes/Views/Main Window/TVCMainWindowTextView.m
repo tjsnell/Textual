@@ -403,6 +403,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)paste:(nullable id)sender
 {
+	NSData *png = [self pngImageDataFromPasteboard:[NSPasteboard generalPasteboard]];
+
+	if (png != nil) {
+		[self uploadPNGImageData:png];
+
+		[self recalculateTextViewSize];
+
+		return;
+	}
+
 	[super paste:self];
 
 	[self recalculateTextViewSize];
