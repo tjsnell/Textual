@@ -296,7 +296,9 @@ NS_ASSUME_NONNULL_BEGIN
 	return [pasteboard canReadObjectForClasses:@[[NSURL class]] options:options];
 }
 
-/* Re-encodes an NSImage as PNG data. Safe to call off the main thread. */
+/* Re-encodes an NSImage as PNG data. Safe to call off the main thread ONLY if
+ the caller hands off exclusive ownership of the image (NSImage's internal rep
+ caching is not thread-safe if the same image is also touched on another thread). */
 + (nullable NSData *)pngDataFromImage:(nullable NSImage *)image
 {
 	if (image == nil) {
@@ -318,9 +320,6 @@ NS_ASSUME_NONNULL_BEGIN
 	return [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
 }
 
-/* Inserts a placeholder token at the caret, uploads the image, and swaps the
- token for the resulting URL (or an auto-clearing failure note). No message is
- ever sent automatically — the URL only lands in the input field. */
 /* Inserts a placeholder token at the caret immediately, then normalizes the
  image to PNG and uploads it OFF the main thread, swapping the token for the
  resulting URL (or an auto-clearing failure note). No message is ever sent
@@ -492,6 +491,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 		[self recalculateTextViewSize];
 
+		/* The drop is accepted regardless of the text portion — the image upload
+		 has begun and its placeholder is in the field. */
 		return YES;
 	}
 
