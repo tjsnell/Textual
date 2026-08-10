@@ -30,6 +30,14 @@ typedef NS_ENUM(NSUInteger, TXURLShortenerService) {
 + (NSArray<NSString *> *)shortenableURLsInString:(NSString *)string
                                    minimumLength:(NSUInteger)minimumLength;
 
+/* Replace each key of shortURLs with its value. Mappings whose replacement
+ is not strictly shorter than the original are skipped. */
++ (NSString *)string:(NSString *)string
+ byApplyingShortURLs:(NSDictionary<NSString *, NSString *> *)shortURLs;
+
++ (NSAttributedString *)attributedString:(NSAttributedString *)string
+                     byApplyingShortURLs:(NSDictionary<NSString *, NSString *> *)shortURLs;
+
 @end
 
 NS_ASSUME_NONNULL_END

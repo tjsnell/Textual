@@ -101,10 +101,38 @@ static void testURLDetection(void) {
 	check(urls.count == 2, "multiple urls deduplicated");
 }
 
+static void testSubstitution(void) {
+	NSDictionary *mapping = @{
+		@"https://example.com/some/very/long/path/that/keeps/going": @"https://tinyurl.com/abc123"
+	};
+
+	NSString *result =
+	[TXURLShortener string:@"check https://example.com/some/very/long/path/that/keeps/going out"
+	   byApplyingShortURLs:mapping];
+	check([result isEqualToString:@"check https://tinyurl.com/abc123 out"],
+		"url replaced inside message");
+
+	result = [TXURLShortener string:@"https://a.co/b"
+	            byApplyingShortURLs:@{@"https://a.co/b": @"https://tinyurl.com/longer-than-original"}];
+	check([result isEqualToString:@"https://a.co/b"],
+		"replacement longer than original keeps original");
+
+	NSAttributedString *attributed =
+	[[NSAttributedString alloc] initWithString:
+		@"see https://example.com/some/very/long/path/that/keeps/going twice "
+		@"https://example.com/some/very/long/path/that/keeps/going"];
+	NSAttributedString *attributedResult =
+	[TXURLShortener attributedString:attributed byApplyingShortURLs:mapping];
+	check([attributedResult.string isEqualToString:
+		@"see https://tinyurl.com/abc123 twice https://tinyurl.com/abc123"],
+		"attributed string replaces every occurrence");
+}
+
 int main(void) { @autoreleasepool {
 	testRequestURLBuilding();
 	testResponseValidation();
 	testURLDetection();
+	testSubstitution();
 	printf(gFailures ? "\n%d FAILURE(S)\n" : "\nALL PASSED\n", gFailures);
 	return gFailures ? 1 : 0;
 } }

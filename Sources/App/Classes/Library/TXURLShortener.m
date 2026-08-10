@@ -138,6 +138,44 @@ static NSString * _Nullable TXURLShortenerSetError(NSError * _Nullable * _Nullab
 	return [urls copy];
 }
 
++ (NSString *)string:(NSString *)string
+ byApplyingShortURLs:(NSDictionary<NSString *, NSString *> *)shortURLs
+{
+	NSAttributedString *wrapped = [[NSAttributedString alloc] initWithString:string];
+
+	return [self attributedString:wrapped byApplyingShortURLs:shortURLs].string;
+}
+
++ (NSAttributedString *)attributedString:(NSAttributedString *)string
+                     byApplyingShortURLs:(NSDictionary<NSString *, NSString *> *)shortURLs
+{
+	NSMutableAttributedString *result = [string mutableCopy];
+
+	for (NSString *original in shortURLs) {
+		NSString *shortened = shortURLs[original];
+
+		if (shortened.length >= original.length) {
+			continue;
+		}
+
+		NSRange searchRange = NSMakeRange(0, result.length);
+		NSRange found;
+
+		while ((found = [result.string rangeOfString:original
+		                                     options:0
+		                                       range:searchRange]).location != NSNotFound)
+		{
+			[result replaceCharactersInRange:found withString:shortened];
+
+			NSUInteger resumeAt = (found.location + shortened.length);
+
+			searchRange = NSMakeRange(resumeAt, (result.length - resumeAt));
+		}
+	}
+
+	return [result copy];
+}
+
 @end
 
 NS_ASSUME_NONNULL_END
