@@ -20,6 +20,73 @@ static NSString * _Nullable TXURLShortenerSetError(NSError * _Nullable * _Nullab
 
 @implementation TXURLShortener
 
+- (NSURLSession *)session
+{
+	if (self->_session == nil) {
+		self->_session = [NSURLSession sharedSession];
+	}
+	return self->_session;
+}
+
+- (void)shortenURLs:(NSArray<NSString *> *)urls
+            service:(TXURLShortenerService)service
+         completion:(void (^)(NSDictionary<NSString *, NSString *> *))completion
+{
+	NSMutableDictionary<NSString *, NSString *> *results = [NSMutableDictionary dictionary];
+
+	dispatch_group_t group = dispatch_group_create();
+
+	dispatch_queue_t resultsQueue =
+	dispatch_queue_create("Textual.TXURLShortener.results", DISPATCH_QUEUE_SERIAL);
+
+	for (NSString *url in urls) {
+		NSURL *requestURL = [[self class] requestURLForService:service originalURL:url];
+
+		if (requestURL == nil) {
+			continue;
+		}
+
+		NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:requestURL];
+
+		request.timeoutInterval = 10.0;
+
+		dispatch_group_enter(group);
+
+		NSURLSessionDataTask *task =
+		[self.session dataTaskWithRequest:request
+		                completionHandler:^(NSData * _Nullable data,
+		                                    NSURLResponse * _Nullable response,
+		                                    NSError * _Nullable transportError)
+		{
+			NSString *shortURL = nil;
+
+			if (transportError == nil) {
+				NSInteger status = 0;
+
+				if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+					status = ((NSHTTPURLResponse *)response).statusCode;
+				}
+
+				shortURL = [[self class] shortURLFromResponseData:data statusCode:status error:NULL];
+			}
+
+			dispatch_async(resultsQueue, ^{
+				if (shortURL != nil) {
+					results[url] = shortURL;
+				}
+
+				dispatch_group_leave(group);
+			});
+		}];
+
+		[task resume];
+	}
+
+	dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+		completion([results copy]);
+	});
+}
+
 + (nullable NSURL *)requestURLForService:(TXURLShortenerService)service
                              originalURL:(NSString *)originalURL
 {

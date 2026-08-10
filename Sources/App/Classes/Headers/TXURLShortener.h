@@ -10,6 +10,17 @@ typedef NS_ENUM(NSUInteger, TXURLShortenerService) {
 
 @interface TXURLShortener : NSObject
 
+/* Injectable for testing; defaults to +[NSURLSession sharedSession]. */
+@property (nonatomic, strong) NSURLSession *session;
+
+/* Shortens every URL in urls concurrently using service. completion is
+ always called on the main queue with a mapping of original URL ->
+ shortened URL. URLs whose request failed, returned an invalid body, or
+ timed out (10s) are simply absent from the mapping. */
+- (void)shortenURLs:(NSArray<NSString *> *)urls
+            service:(TXURLShortenerService)service
+         completion:(void (^)(NSDictionary<NSString *, NSString *> *shortURLs))completion;
+
 #pragma mark - Pure helpers (exposed for testing)
 
 /* Returns the GET request URL for shortening originalURL with service,
