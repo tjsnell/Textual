@@ -145,4 +145,4 @@ Unit tests in the existing `Tests/` target, no live network:
   ibtool requirement.
 - **Verification.** Full `xcodebuild` of scheme "Textual (Debug)" succeeded
   with zero warnings in the files this feature touched; standalone test
-  suite passes 22/22.
+  suite passes 23/23.
