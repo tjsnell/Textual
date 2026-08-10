@@ -862,7 +862,7 @@
         </customView>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView translatesAutoresizingMaskIntoConstraints="NO" id="Yrc-pc-3Zr" userLabel="Behavior">
-            <rect key="frame" x="0.0" y="0.0" width="670" height="272"/>
+            <rect key="frame" x="0.0" y="0.0" width="670" height="380"/>
             <subviews>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dcr-ig-DFq">
                     <rect key="frame" x="40" y="225" width="255" height="18"/>
@@ -930,12 +930,95 @@
                         <binding destination="G2Q-fc-ddg" name="value" keyPath="values.ServerListRetainsQueriesBetweenRestarts" id="kpU-pS-LO5"/>
                     </connections>
                 </button>
+                <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="uS1-eP-arA">
+                    <rect key="frame" x="40" y="-1" width="590" height="5"/>
+                </box>
+                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uS2-cB-oxA">
+                    <rect key="frame" x="40" y="-34" width="330" height="18"/>
+                    <buttonCell key="cell" type="check" title="Automatically shorten links in sent messages" bezelStyle="regularSquare" imagePosition="left" inset="2" id="uS2-cE-llA">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="G2Q-fc-ddg" name="value" keyPath="values.AutomaticallyShortenOutgoingLinks" id="uS2-bD-001"/>
+                    </connections>
+                </button>
+                <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="8" horizontalStackHuggingPriority="250" verticalStackHuggingPriority="250" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uS6-sV-rwA">
+                    <rect key="frame" x="62" y="-73" width="440" height="25"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uS4-lB-el1">
+                            <rect key="frame" x="0.0" y="4" width="52" height="16"/>
+                            <textFieldCell key="cell" lineBreakMode="clipping" title="Service:" id="uS4-cE-ll1">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uS3-pU-pbA">
+                            <rect key="frame" x="57" y="0.0" width="110" height="25"/>
+                            <popUpButtonCell key="cell" type="push" title="TinyURL" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" selectedItem="uS3-mI-001" id="uS3-cE-llA">
+                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" usesAppearanceFont="YES"/>
+                                <menu key="menu" title="OtherViews" id="uS3-mE-nuA">
+                                    <items>
+                                        <menuItem title="TinyURL" state="on" id="uS3-mI-001"/>
+                                        <menuItem title="is.gd" tag="1" id="uS3-mI-002"/>
+                                        <menuItem title="v.gd" tag="2" id="uS3-mI-003"/>
+                                    </items>
+                                </menu>
+                            </popUpButtonCell>
+                            <accessibility description="URL Shortener Service"/>
+                            <connections>
+                                <binding destination="G2Q-fc-ddg" name="selectedTag" keyPath="values.URLShortenerService" id="uS3-bD-001"/>
+                                <binding destination="G2Q-fc-ddg" name="enabled" keyPath="values.AutomaticallyShortenOutgoingLinks" id="uS3-bD-002"/>
+                            </connections>
+                        </popUpButton>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uS4-lB-el2">
+                            <rect key="frame" x="175" y="4" width="130" height="16"/>
+                            <textFieldCell key="cell" lineBreakMode="clipping" title="Minimum link length:" id="uS4-cE-ll2">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uS5-tF-ldA">
+                            <rect key="frame" x="313" y="2" width="50" height="21"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="50" id="uS5-cN-wid"/>
+                            </constraints>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" alignment="right" title="40" drawsBackground="YES" id="uS5-cE-llA">
+                                <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="none" minimumIntegerDigits="1" maximumIntegerDigits="4" id="uS5-fM-t01">
+                                    <real key="minimum" value="1"/>
+                                    <real key="maximum" value="4096"/>
+                                </numberFormatter>
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                            <connections>
+                                <binding destination="G2Q-fc-ddg" name="value" keyPath="values.URLShortenerMinimumLength" id="uS5-bD-001"/>
+                                <binding destination="G2Q-fc-ddg" name="enabled" keyPath="values.AutomaticallyShortenOutgoingLinks" id="uS5-bD-002"/>
+                            </connections>
+                        </textField>
+                    </subviews>
+                    <visibilityPriorities>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                    </visibilityPriorities>
+                    <customSpacing>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                    </customSpacing>
+                </stackView>
             </subviews>
             <constraints>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="xKd-AN-3BU" secondAttribute="trailing" constant="20" id="0fF-fv-xsc"/>
                 <constraint firstItem="2fI-fE-Q2a" firstAttribute="leading" secondItem="OwD-V4-eKh" secondAttribute="leading" id="1D5-i0-ou3"/>
                 <constraint firstItem="Fmc-YR-xfp" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="40" id="3IW-UR-ErE"/>
-                <constraint firstAttribute="bottom" secondItem="2fI-fE-Q2a" secondAttribute="bottom" constant="30" id="5OK-SG-6Vw"/>
                 <constraint firstItem="p8O-gX-t0n" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="42" id="6fB-zi-Wbh"/>
                 <constraint firstItem="Fmc-YR-xfp" firstAttribute="top" secondItem="dcr-ig-DFq" secondAttribute="bottom" constant="18" id="91D-nO-ZaO"/>
                 <constraint firstItem="xKd-AN-3BU" firstAttribute="top" secondItem="VYB-Yi-fp6" secondAttribute="bottom" constant="14" id="AQv-0d-a36"/>
@@ -957,6 +1040,16 @@
                 <constraint firstItem="VYB-Yi-fp6" firstAttribute="leading" secondItem="p8O-gX-t0n" secondAttribute="leading" id="sS5-Ry-hhS"/>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="dcr-ig-DFq" secondAttribute="trailing" constant="20" id="yM2-MK-thd"/>
                 <constraint firstItem="2fI-fE-Q2a" firstAttribute="top" secondItem="OwD-V4-eKh" secondAttribute="bottom" constant="14" id="zK3-2W-liT"/>
+                <constraint firstItem="uS1-eP-arA" firstAttribute="top" secondItem="2fI-fE-Q2a" secondAttribute="bottom" constant="18" id="uSc-01-aaa"/>
+                <constraint firstItem="uS1-eP-arA" firstAttribute="leading" secondItem="Fmc-YR-xfp" secondAttribute="leading" id="uSc-02-aaa"/>
+                <constraint firstItem="uS1-eP-arA" firstAttribute="trailing" secondItem="Fmc-YR-xfp" secondAttribute="trailing" id="uSc-03-aaa"/>
+                <constraint firstItem="uS2-cB-oxA" firstAttribute="top" secondItem="uS1-eP-arA" secondAttribute="bottom" constant="18" id="uSc-04-aaa"/>
+                <constraint firstItem="uS2-cB-oxA" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="42" id="uSc-05-aaa"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="uS2-cB-oxA" secondAttribute="trailing" constant="20" id="uSc-06-aaa"/>
+                <constraint firstItem="uS6-sV-rwA" firstAttribute="top" secondItem="uS2-cB-oxA" secondAttribute="bottom" constant="14" id="uSc-07-aaa"/>
+                <constraint firstItem="uS6-sV-rwA" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="62" id="uSc-08-aaa"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="uS6-sV-rwA" secondAttribute="trailing" constant="20" id="uSc-09-aaa"/>
+                <constraint firstAttribute="bottom" secondItem="uS6-sV-rwA" secondAttribute="bottom" constant="30" id="uSc-10-aaa"/>
             </constraints>
             <point key="canvasLocation" x="318" y="-6756"/>
         </customView>
