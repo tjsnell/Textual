@@ -64,9 +64,47 @@ static void testResponseValidation(void) {
 	check(url == nil && err != nil, "body with embedded whitespace -> error");
 }
 
+static void testURLDetection(void) {
+	NSArray *urls;
+
+	urls = [TXURLShortener shortenableURLsInString:
+		@"check this https://example.com/some/very/long/path/that/keeps/going out"
+	                                 minimumLength:40];
+	check(urls.count == 1 &&
+		[urls[0] isEqualToString:@"https://example.com/some/very/long/path/that/keeps/going"],
+		"long https url detected");
+
+	urls = [TXURLShortener shortenableURLsInString:@"see https://ex.co/a" minimumLength:40];
+	check(urls.count == 0, "short url below threshold ignored");
+
+	urls = [TXURLShortener shortenableURLsInString:
+		@"ftp://example.com/some/very/long/path/that/keeps/going/x" minimumLength:40];
+	check(urls.count == 0, "non-http scheme ignored");
+
+	urls = [TXURLShortener shortenableURLsInString:
+		@"www.example.com/some/very/long/path/that/keeps/going/xy" minimumLength:40];
+	check(urls.count == 0, "schemeless link ignored");
+
+	urls = [TXURLShortener shortenableURLsInString:
+		@"/topic https://example.com/some/very/long/path/that/keeps/going" minimumLength:40];
+	check(urls.count == 0, "slash command not processed");
+
+	urls = [TXURLShortener shortenableURLsInString:
+		@"/me shares https://example.com/some/very/long/path/that/keeps/going" minimumLength:40];
+	check(urls.count == 1, "/me action processed");
+
+	urls = [TXURLShortener shortenableURLsInString:
+		@"https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa and "
+		@"https://example.com/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb and "
+		@"https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	                                 minimumLength:40];
+	check(urls.count == 2, "multiple urls deduplicated");
+}
+
 int main(void) { @autoreleasepool {
 	testRequestURLBuilding();
 	testResponseValidation();
+	testURLDetection();
 	printf(gFailures ? "\n%d FAILURE(S)\n" : "\nALL PASSED\n", gFailures);
 	return gFailures ? 1 : 0;
 } }

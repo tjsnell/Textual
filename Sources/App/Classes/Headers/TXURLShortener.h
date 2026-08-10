@@ -24,6 +24,12 @@ typedef NS_ENUM(NSUInteger, TXURLShortenerService) {
                                      statusCode:(NSInteger)statusCode
                                           error:(NSError * _Nullable * _Nullable)error;
 
+/* Returns the unique http(s) URLs in string, as they literally appear, whose
+ length is >= minimumLength. Returns an empty array for slash commands other
+ than "/me ". */
++ (NSArray<NSString *> *)shortenableURLsInString:(NSString *)string
+                                   minimumLength:(NSUInteger)minimumLength;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -89,6 +89,55 @@ static NSString * _Nullable TXURLShortenerSetError(NSError * _Nullable * _Nullab
 	return trimmed;
 }
 
++ (NSArray<NSString *> *)shortenableURLsInString:(NSString *)string
+                                   minimumLength:(NSUInteger)minimumLength
+{
+	/* Slash-command parsing happens downstream in IRCClient; only plain
+	 messages and "/me" actions are eligible for shortening. */
+	if ([string hasPrefix:@"/"] &&
+		[string.lowercaseString hasPrefix:@"/me "] == NO)
+	{
+		return @[];
+	}
+
+	NSDataDetector *detector =
+	[NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:NULL];
+
+	if (detector == nil) {
+		return @[];
+	}
+
+	NSMutableArray<NSString *> *urls = [NSMutableArray array];
+
+	[detector enumerateMatchesInString:string
+	                           options:0
+	                             range:NSMakeRange(0, string.length)
+	                        usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+	{
+		NSString *matched = [string substringWithRange:result.range];
+
+		/* Require an explicit scheme so the literal substring is a complete
+		 URL the shortener API will accept. */
+		NSString *lowercased = matched.lowercaseString;
+
+		if ([lowercased hasPrefix:@"http://"] == NO &&
+			[lowercased hasPrefix:@"https://"] == NO)
+		{
+			return;
+		}
+
+		if (matched.length < minimumLength) {
+			return;
+		}
+
+		if ([urls containsObject:matched] == NO) {
+			[urls addObject:matched];
+		}
+	}];
+
+	return [urls copy];
+}
+
 @end
 
 NS_ASSUME_NONNULL_END
