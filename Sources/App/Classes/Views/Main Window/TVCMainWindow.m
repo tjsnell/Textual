@@ -1279,7 +1279,9 @@ NSString * const TVCMainWindowSelectionChangedNotification = @"TVCMainWindowSele
 		return;
 	}
 
-	if (command == IRCRemoteCommandPrivmsg && [TPCPreferences shortenOutgoingURLs]) {
+	if ((command == IRCRemoteCommandPrivmsg || command == IRCRemoteCommandPrivmsgAction) &&
+		[TPCPreferences shortenOutgoingURLs])
+	{
 		NSString *plainText = nil;
 
 		if ([stringValue isKindOfClass:[NSAttributedString class]]) {
@@ -1320,6 +1322,9 @@ NSString * const TVCMainWindowSelectionChangedNotification = @"TVCMainWindowSele
 	TXURLShortenerService service =
 	(TXURLShortenerService)[TPCPreferences urlShortenerService];
 
+	/* The send is deferred until every request completes or times out (10s),
+	 so a message sent immediately after this one may arrive first. Accepted
+	 tradeoff of shortening asynchronously. */
 	[self.urlShortener shortenURLs:urls
 	                       service:service
 	                    completion:^(NSDictionary<NSString *, NSString *> *shortURLs)
