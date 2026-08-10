@@ -136,6 +136,15 @@ static void testSubstitution(void) {
 	            byApplyingShortURLs:overlapping];
 	check([result isEqualToString:@"a https://is.gd/BBB2 b https://is.gd/AAA1 c"],
 		"longer overlapping url replaced before its prefix");
+
+	result = [TXURLShortener string:
+		@"see https://example.com/some/very/long/path/that/keeps/going/further and https://example.com/some/very/long/path/that/keeps/going"
+	            byApplyingShortURLs:@{
+		@"https://example.com/some/very/long/path/that/keeps/going": @"https://is.gd/AAA1"
+	}];
+	check([result isEqualToString:
+		@"see https://example.com/some/very/long/path/that/keeps/going/further and https://is.gd/AAA1"],
+		"failed longer url not corrupted by its successful prefix");
 }
 
 int main(void) { @autoreleasepool {

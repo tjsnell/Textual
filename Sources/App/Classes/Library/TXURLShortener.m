@@ -218,6 +218,13 @@ static NSString * _Nullable TXURLShortenerSetError(NSError * _Nullable * _Nullab
 {
 	NSMutableAttributedString *result = [string mutableCopy];
 
+	NSDataDetector *detector =
+	[NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:NULL];
+
+	if (detector == nil) {
+		return [result copy];
+	}
+
 	NSArray<NSString *> *originals =
 	[shortURLs.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
 		if (a.length < b.length) {
@@ -235,18 +242,29 @@ static NSString * _Nullable TXURLShortenerSetError(NSError * _Nullable * _Nullab
 			continue;
 		}
 
-		NSRange searchRange = NSMakeRange(0, result.length);
-		NSRange found;
+		/* Replace only detector matches whose text equals the original URL,
+		 so a failed longer URL that contains this one as a prefix is never
+		 rewritten from the inside. Rescan after each replacement because
+		 ranges shift. */
+		BOOL replaced = YES;
 
-		while ((found = [result.string rangeOfString:original
-		                                     options:0
-		                                       range:searchRange]).location != NSNotFound)
-		{
-			[result replaceCharactersInRange:found withString:shortened];
+		while (replaced) {
+			replaced = NO;
 
-			NSUInteger resumeAt = (found.location + shortened.length);
+			NSArray<NSTextCheckingResult *> *matches =
+			[detector matchesInString:result.string options:0 range:NSMakeRange(0, result.length)];
 
-			searchRange = NSMakeRange(resumeAt, (result.length - resumeAt));
+			for (NSTextCheckingResult *match in matches) {
+				if ([[result.string substringWithRange:match.range] isEqualToString:original] == NO) {
+					continue;
+				}
+
+				[result replaceCharactersInRange:match.range withString:shortened];
+
+				replaced = YES;
+
+				break;
+			}
 		}
 	}
 
