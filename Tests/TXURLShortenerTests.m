@@ -126,6 +126,16 @@ static void testSubstitution(void) {
 	check([attributedResult.string isEqualToString:
 		@"see https://tinyurl.com/abc123 twice https://tinyurl.com/abc123"],
 		"attributed string replaces every occurrence");
+
+	NSDictionary *overlapping = @{
+		@"https://example.com/some/very/long/path/that/keeps/going": @"https://is.gd/AAA1",
+		@"https://example.com/some/very/long/path/that/keeps/going/further": @"https://is.gd/BBB2"
+	};
+
+	result = [TXURLShortener string:@"a https://example.com/some/very/long/path/that/keeps/going/further b https://example.com/some/very/long/path/that/keeps/going c"
+	            byApplyingShortURLs:overlapping];
+	check([result isEqualToString:@"a https://is.gd/BBB2 b https://is.gd/AAA1 c"],
+		"longer overlapping url replaced before its prefix");
 }
 
 int main(void) { @autoreleasepool {

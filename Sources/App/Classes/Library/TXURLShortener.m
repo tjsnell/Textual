@@ -218,7 +218,17 @@ static NSString * _Nullable TXURLShortenerSetError(NSError * _Nullable * _Nullab
 {
 	NSMutableAttributedString *result = [string mutableCopy];
 
-	for (NSString *original in shortURLs) {
+	NSArray<NSString *> *originals =
+	[shortURLs.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
+		if (a.length < b.length) {
+			return NSOrderedDescending;
+		} else if (a.length > b.length) {
+			return NSOrderedAscending;
+		}
+		return NSOrderedSame;
+	}];
+
+	for (NSString *original in originals) {
 		NSString *shortened = shortURLs[original];
 
 		if (shortened.length >= original.length) {
