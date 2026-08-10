@@ -121,3 +121,24 @@ Unit tests in the existing `Tests/` target, no live network:
 - URL detection/substitution — threshold filtering, multiple URLs,
   non-http schemes ignored, commands other than messages/`/me` untouched,
   result-longer-than-original keeps original.
+
+## As-built deviations
+
+- **Overlap-safe substitution.** Code review found that when one detected URL
+  is a prefix of another, replacing the shorter first corrupted the longer
+  (nondeterministically, per dictionary order). Substitution now iterates
+  mappings sorted by original length descending (commit 3adce3231), with a
+  deterministic regression test (22 checks total).
+- **Cmd-Return actions are shortened too.** The interception guard accepts
+  `IRCRemoteCommandPrivmsgAction` in addition to `IRCRemoteCommandPrivmsg`
+  (commit 3a9020b8e) — the spec's "plain messages and `/me` actions" scope
+  otherwise excluded actions sent via Cmd-Return. The async send-ordering
+  tradeoff (a deferred message may arrive after a later one) is documented
+  in a code comment at the shorten call site.
+- **Xib stackView extras.** The preferences row stackView carries
+  `visibilityPriorities`/`customSpacing` children mirrored from the file's
+  existing stackView precedent, which the plan anticipated as a possible
+  ibtool requirement.
+- **Verification.** Full `xcodebuild` of scheme "Textual (Debug)" succeeded
+  with zero warnings in the files this feature touched; standalone test
+  suite passes 22/22.
