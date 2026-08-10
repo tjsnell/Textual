@@ -32,8 +32,41 @@ static void testRequestURLBuilding(void) {
 		"query characters and plus fully percent-encoded");
 }
 
+static void testResponseValidation(void) {
+	NSError *err = nil;
+
+	NSData *ok = [@"https://tinyurl.com/abc123\n" dataUsingEncoding:NSUTF8StringEncoding];
+	NSString *url = [TXURLShortener shortURLFromResponseData:ok statusCode:200 error:&err];
+	check([url isEqualToString:@"https://tinyurl.com/abc123"], "200 + url body -> trimmed url");
+	check(err == nil, "success leaves error nil");
+
+	err = nil;
+	NSData *httpOK = [@"http://tinyurl.com/abc123" dataUsingEncoding:NSUTF8StringEncoding];
+	url = [TXURLShortener shortURLFromResponseData:httpOK statusCode:200 error:&err];
+	check([url isEqualToString:@"http://tinyurl.com/abc123"], "http scheme accepted");
+
+	err = nil;
+	NSData *isgdError = [@"Error: Please enter a valid URL to shorten" dataUsingEncoding:NSUTF8StringEncoding];
+	url = [TXURLShortener shortURLFromResponseData:isgdError statusCode:200 error:&err];
+	check(url == nil && err != nil, "200 + error body -> error");
+
+	err = nil;
+	url = [TXURLShortener shortURLFromResponseData:ok statusCode:503 error:&err];
+	check(url == nil && err != nil, "non-2xx status -> error");
+
+	err = nil;
+	url = [TXURLShortener shortURLFromResponseData:nil statusCode:200 error:&err];
+	check(url == nil && err != nil, "nil body -> error");
+
+	err = nil;
+	NSData *multiword = [@"https://is.gd/x y junk" dataUsingEncoding:NSUTF8StringEncoding];
+	url = [TXURLShortener shortURLFromResponseData:multiword statusCode:200 error:&err];
+	check(url == nil && err != nil, "body with embedded whitespace -> error");
+}
+
 int main(void) { @autoreleasepool {
 	testRequestURLBuilding();
+	testResponseValidation();
 	printf(gFailures ? "\n%d FAILURE(S)\n" : "\nALL PASSED\n", gFailures);
 	return gFailures ? 1 : 0;
 } }

@@ -17,6 +17,13 @@ typedef NS_ENUM(NSUInteger, TXURLShortenerService) {
 + (nullable NSURL *)requestURLForService:(TXURLShortenerService)service
                              originalURL:(NSString *)originalURL;
 
+/* Validates a shortener response. Returns the short URL, or nil with error
+ set, when the status is non-2xx or the body is not a single http(s) URL
+ (is.gd/v.gd report failures as an "Error: ..." text body). */
++ (nullable NSString *)shortURLFromResponseData:(nullable NSData *)data
+                                     statusCode:(NSInteger)statusCode
+                                          error:(NSError * _Nullable * _Nullable)error;
+
 @end
 
 NS_ASSUME_NONNULL_END
