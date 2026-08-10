@@ -55,6 +55,7 @@
 #import "TVCMainWindowTextViewPrivate.h"
 #import "TVCMainWindowTitlebarAccessoryViewPrivate.h"
 #import "TVCServerListPrivate.h"
+#import "TXURLShortener.h"
 #import "TVCServerListAppearancePrivate.h"
 #import "TVCServerListCellPrivate.h"
 #import "TVCMemberListPrivate.h"
@@ -103,6 +104,7 @@ NSString * const TVCMainWindowSelectionChangedNotification = @"TVCMainWindowSele
 @property (nonatomic, weak, readwrite) IBOutlet TVCMemberList *memberList;
 @property (nonatomic, weak, readwrite) IBOutlet TVCServerList *serverList;
 @property (nonatomic, strong) TLOInputHistory *inputHistoryManager;
+@property (nonatomic, strong, nullable) TXURLShortener *urlShortener;
 @property (nonatomic, strong) TLONicknameCompletionStatus *nicknameCompletionStatus;
 @property (nonatomic, strong, readwrite) TVCMainWindowAppearance *userInterfaceObjects;
 @property (nonatomic, readwrite, copy) NSArray *selectedItems;
@@ -1270,13 +1272,72 @@ NSString * const TVCMainWindowSelectionChangedNotification = @"TVCMainWindowSele
 		return;
 	}
 
-	NSString *stringValue = [THOPluginDispatcher interceptUserInput:string command:command];
-	
+	/* Plugins may return either NSString or NSAttributedString here. */
+	id stringValue = [THOPluginDispatcher interceptUserInput:string command:command];
+
 	if (stringValue == nil) {
 		return;
 	}
 
+	if (command == IRCRemoteCommandPrivmsg && [TPCPreferences shortenOutgoingURLs]) {
+		NSString *plainText = nil;
+
+		if ([stringValue isKindOfClass:[NSAttributedString class]]) {
+			plainText = ((NSAttributedString *)stringValue).string;
+		} else if ([stringValue isKindOfClass:[NSString class]]) {
+			plainText = stringValue;
+		}
+
+		NSArray<NSString *> *urls = @[];
+
+		if (plainText != nil) {
+			urls = [TXURLShortener shortenableURLsInString:plainText
+			                                 minimumLength:[TPCPreferences urlShortenerMinimumLength]];
+		}
+
+		if (urls.count > 0) {
+			[self sendInputText:stringValue asCommand:command shorteningURLs:urls];
+
+			return;
+		}
+	}
+
 	[self.selectedClient inputText:stringValue asCommand:command];
+}
+
+- (void)sendInputText:(id)stringValue asCommand:(IRCRemoteCommand)command shorteningURLs:(NSArray<NSString *> *)urls
+{
+	if (self.urlShortener == nil) {
+		self.urlShortener = [TXURLShortener new];
+	}
+
+	/* Capture the destination now so the message reaches the view that was
+	 selected when the user hit enter, even if selection changes while the
+	 shortener requests are in flight. */
+	IRCClient *client = self.selectedClient;
+	IRCTreeItem *destination = self.selectedItem;
+
+	TXURLShortenerService service =
+	(TXURLShortenerService)[TPCPreferences urlShortenerService];
+
+	[self.urlShortener shortenURLs:urls
+	                       service:service
+	                    completion:^(NSDictionary<NSString *, NSString *> *shortURLs)
+	{
+		id result = stringValue;
+
+		/* Failed URLs are absent from the mapping and remain unmodified —
+		 the message always sends. */
+		if (shortURLs.count > 0) {
+			if ([stringValue isKindOfClass:[NSAttributedString class]]) {
+				result = [TXURLShortener attributedString:stringValue byApplyingShortURLs:shortURLs];
+			} else {
+				result = [TXURLShortener string:stringValue byApplyingShortURLs:shortURLs];
+			}
+		}
+
+		[client inputText:result asCommand:command destination:destination];
+	}];
 }
 
 #pragma mark -
