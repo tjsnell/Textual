@@ -315,6 +315,10 @@ typedef NS_ENUM(NSUInteger, TXPreferredAppearance) {
 
 + (CGFloat)swipeMinimumLength;
 
++ (BOOL)shortenOutgoingURLs;
++ (NSUInteger)urlShortenerService; /* cast to TXURLShortenerService */
++ (NSUInteger)urlShortenerMinimumLength;
+
 + (nullable NSArray<NSString *> *)highlightMatchKeywords;
 + (nullable NSArray<NSString *> *)highlightExcludeKeywords;
 

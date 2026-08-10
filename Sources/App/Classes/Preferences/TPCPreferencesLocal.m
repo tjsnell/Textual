@@ -442,6 +442,21 @@ NSUInteger const TPCPreferencesDictionaryVersion = 602;
 	return [RZUserDefaults() doubleForKey:@"SwipeMinimumLength"];
 }
 
++ (BOOL)shortenOutgoingURLs
+{
+	return [RZUserDefaults() boolForKey:@"AutomaticallyShortenOutgoingLinks"];
+}
+
++ (NSUInteger)urlShortenerService
+{
+	return [RZUserDefaults() unsignedIntegerForKey:@"URLShortenerService"];
+}
+
++ (NSUInteger)urlShortenerMinimumLength
+{
+	return [RZUserDefaults() unsignedIntegerForKey:@"URLShortenerMinimumLength"];
+}
+
 + (NSUInteger)trackUserAwayStatusMaximumChannelSize
 {
 	return [RZUserDefaults() unsignedIntegerForKey:@"TrackUserAwayStatusMaximumChannelSize"];

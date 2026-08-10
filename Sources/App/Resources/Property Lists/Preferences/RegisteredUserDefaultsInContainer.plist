@@ -14,6 +14,8 @@
 	<false/>
 	<key>AutojoinChannelOnInvite</key>
 	<false/>
+	<key>AutomaticallyShortenOutgoingLinks</key>
+	<false/>
 	<key>AutojoinDelayBetweenChannelJoins</key>
 	<real>2.2</real>
 	<key>AutojoinDelayAfterIdentification</key>
@@ -236,6 +238,10 @@
 	<integer>0</integer>
 	<key>SwipeMinimumLength</key>
 	<integer>30</integer>
+	<key>URLShortenerMinimumLength</key>
+	<integer>40</integer>
+	<key>URLShortenerService</key>
+	<integer>0</integer>
 	<key>Tab Completion -&gt; Completion Suffix Cut Forward Until Space</key>
 	<false/>
 	<key>Tab Completion -&gt; Do Not Use Whitespace for Missing Completion Suffix</key>
