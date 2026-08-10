@@ -87,11 +87,11 @@ Service endpoints:
 Three new keys on `TPCPreferences`, with defaults registered alongside the
 existing keys:
 
-| Key | Type | Default |
-|-----|------|---------|
-| `urlShortenerEnabled` | BOOL | NO |
-| `urlShortenerService` | integer enum (0 = TinyURL, 1 = is.gd, 2 = v.gd) | 0 |
-| `urlShortenerMinimumLength` | integer | 40 |
+| Defaults key | Accessor | Type | Default |
+|--------------|----------|------|---------|
+| `AutomaticallyShortenOutgoingLinks` | `+shortenOutgoingURLs` | BOOL | NO |
+| `URLShortenerService` | `+urlShortenerService` | integer enum (0 = TinyURL, 1 = is.gd, 2 = v.gd) | 0 |
+| `URLShortenerMinimumLength` | `+urlShortenerMinimumLength` | integer | 40 |
 
 UI lives in the **Behavior** pane (`contentViewBehavior`) of
 `TDCPreferencesController`:
