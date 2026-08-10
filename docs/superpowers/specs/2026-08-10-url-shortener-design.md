@@ -127,8 +127,12 @@ Unit tests in the existing `Tests/` target, no live network:
 - **Overlap-safe substitution.** Code review found that when one detected URL
   is a prefix of another, replacing the shorter first corrupted the longer
   (nondeterministically, per dictionary order). Substitution now iterates
-  mappings sorted by original length descending (commit 3adce3231), with a
-  deterministic regression test (22 checks total).
+  mappings sorted by original length descending (commit 3adce3231), and —
+  after final review found the asymmetric case where the longer URL's
+  request failed — replaces only `NSDataDetector` link matches whose text
+  exactly equals the original URL (commit b3e955c7c), so a failed longer
+  URL is never rewritten from the inside. Both cases have deterministic
+  regression tests (23 checks total).
 - **Cmd-Return actions are shortened too.** The interception guard accepts
   `IRCRemoteCommandPrivmsgAction` in addition to `IRCRemoteCommandPrivmsg`
   (commit 3a9020b8e) — the spec's "plain messages and `/me` actions" scope
