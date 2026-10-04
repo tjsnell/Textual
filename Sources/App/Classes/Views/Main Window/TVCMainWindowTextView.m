@@ -366,6 +366,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 			[strongSelf.imageUploader uploadImageData:pngData
 			                                filename:@"image.png"
+			                                 service:(TXImageUploadService)[TPCPreferences imageUploadService]
 			                              completion:^(NSString * _Nullable url, NSError * _Nullable error)
 			{
 				TVCMainWindowTextView *innerSelf = weakSelf;
