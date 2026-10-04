@@ -462,6 +462,11 @@ NSUInteger const TPCPreferencesDictionaryVersion = 602;
 	return [RZUserDefaults() unsignedIntegerForKey:@"ImageUploadService"];
 }
 
++ (NSUInteger)imageUploadRetentionHours
+{
+	return [RZUserDefaults() unsignedIntegerForKey:@"ImageUploadRetentionHours"];
+}
+
 + (NSUInteger)trackUserAwayStatusMaximumChannelSize
 {
 	return [RZUserDefaults() unsignedIntegerForKey:@"TrackUserAwayStatusMaximumChannelSize"];
