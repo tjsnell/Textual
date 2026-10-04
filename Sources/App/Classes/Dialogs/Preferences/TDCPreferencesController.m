@@ -60,6 +60,7 @@
 #import "TDCFileTransferDialogPrivate.h"
 #import "TDCPreferencesNotificationConfigurationPrivate.h"
 #import "TDCPreferencesUserStyleSheetPrivate.h"
+#import "TXImageUploader.h"
 #import "TDCPreferencesControllerPrivate.h"
 
 #if TEXTUAL_BUILT_WITH_SPARKLE_ENABLED == 1
@@ -115,6 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet NSButton *addExcludeKeywordButton;
 @property (nonatomic, weak) IBOutlet NSButton *highlightNicknameButton;
 @property (nonatomic, weak) IBOutlet NSPopUpButton *themeSelectionButton;
+@property (nonatomic, weak) IBOutlet NSPopUpButton *imageUploadRetentionButton;
 @property (nonatomic, weak) IBOutlet NSPopUpButton *transcriptFolderButton;
 @property (nonatomic, weak) IBOutlet NSPopUpButton *fileTransferDownloadDestinationButton;
 @property (nonatomic, weak) IBOutlet NSTableView *excludeKeywordsTable;
@@ -173,6 +175,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (IBAction)onChangedForwardNoticeTo:(id)sender;
 - (IBAction)onChangedHighlightLogging:(id)sender;
 - (IBAction)onChangedHighlightType:(id)sender;
+- (IBAction)onChangedImageUploadService:(id)sender;
 - (IBAction)onChangedInlineMediaOption:(id)sender;
 - (IBAction)onChangedInputHistoryScheme:(id)sender;
 - (IBAction)onChangedMainInputTextViewFontSize:(id)sender; // changed
@@ -270,6 +273,8 @@ NS_ASSUME_NONNULL_BEGIN
 	[self updateTranscriptFolder];
 
 	[self onChangedHighlightType:nil];
+
+	[self onChangedImageUploadService:nil];
 
 	[self onFileTransferIPAddressDetectionMethodChanged:nil];
 
@@ -1287,6 +1292,31 @@ NS_ASSUME_NONNULL_BEGIN
 	[TLOpenLink openWithString:@"https://help.codeux.com/textual/Off-the-Record-Messaging.kb"];
 }
 #endif
+
+- (void)onChangedImageUploadService:(id)sender
+{
+	TXImageUploadService service = (TXImageUploadService)[TPCPreferences imageUploadService];
+
+	if ([sender isKindOfClass:[NSPopUpButton class]]) {
+		service = (TXImageUploadService)[sender selectedTag];
+	}
+
+	NSPopUpButton *retentionButton = self.imageUploadRetentionButton;
+
+	retentionButton.enabled = [TXImageUploader serviceSupportsRetention:service];
+
+	/* Litterbox never keeps a file longer than 72 hours, so "Forever" is not
+	 offered for it and is replaced by the longest period it does allow. */
+	BOOL foreverIsAvailable = (service != TXImageUploadServiceLitterbox);
+
+	[retentionButton itemAtIndex:[retentionButton indexOfItemWithTag:0]].enabled = foreverIsAvailable;
+
+	if (foreverIsAvailable == NO && [TPCPreferences imageUploadRetentionHours] == 0) {
+		[RZUserDefaults() setUnsignedInteger:72 forKey:@"ImageUploadRetentionHours"];
+
+		[retentionButton selectItemWithTag:72];
+	}
+}
 
 - (void)onChangedHighlightType:(id)sender
 {

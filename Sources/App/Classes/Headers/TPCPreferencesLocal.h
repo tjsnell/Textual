@@ -320,6 +320,7 @@ typedef NS_ENUM(NSUInteger, TXPreferredAppearance) {
 + (NSUInteger)urlShortenerMinimumLength;
 
 + (NSUInteger)imageUploadService; /* cast to TXImageUploadService */
++ (NSUInteger)imageUploadRetentionHours; /* 0 = keep forever */
 
 + (nullable NSArray<NSString *> *)highlightMatchKeywords;
 + (nullable NSArray<NSString *> *)highlightExcludeKeywords;
