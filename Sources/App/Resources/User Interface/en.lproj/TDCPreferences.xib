@@ -43,6 +43,7 @@
                 <outlet property="highlightKeywordsArrayController" destination="4310" id="Wre-n3-NQF"/>
                 <outlet property="highlightKeywordsTable" destination="nIO-jH-FEm" id="rwr-Mr-P5g"/>
                 <outlet property="highlightNicknameButton" destination="IVv-zw-dDv" id="5mn-VV-cM3"/>
+                <outlet property="imageUploadRetentionButton" destination="iU8-pU-pbA" id="iU8-oL-001"/>
                 <outlet property="inlineMediaEnabledButton" destination="Clr-Kc-72d" id="l5P-Kw-58h"/>
                 <outlet property="installedAddonsMenu" destination="mgV-ad-4kQ" id="ysw-NY-ZxI"/>
                 <outlet property="installedScriptsController" destination="92m-WJ-gkY" id="Wsq-Rt-t4M"/>
@@ -862,7 +863,7 @@
         </customView>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView translatesAutoresizingMaskIntoConstraints="NO" id="Yrc-pc-3Zr" userLabel="Behavior">
-            <rect key="frame" x="0.0" y="0.0" width="670" height="446"/>
+            <rect key="frame" x="0.0" y="0.0" width="670" height="481"/>
             <subviews>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dcr-ig-DFq">
                     <rect key="frame" x="40" y="225" width="255" height="18"/>
@@ -1030,12 +1031,12 @@
                         </textField>
                         <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iU3-pU-pbA">
                             <rect key="frame" x="165" y="0.0" width="220" height="25"/>
-                            <popUpButtonCell key="cell" type="push" title="catbox.moe" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" selectedItem="iU3-mI-001" id="iU3-cE-llA">
+                            <popUpButtonCell key="cell" type="push" title="Litterbox (kept up to 3 days)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" selectedItem="iU3-mI-001" id="iU3-cE-llA">
                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" usesAppearanceFont="YES"/>
                                 <menu key="menu" title="OtherViews" id="iU3-mE-nuA">
                                     <items>
-                                        <menuItem title="catbox.moe" state="on" id="iU3-mI-001"/>
+                                        <menuItem title="Litterbox (kept up to 3 days)" state="on" id="iU3-mI-001"/>
                                         <menuItem title="x0.at (kept up to 100 days)" tag="1" id="iU3-mI-002"/>
                                         <menuItem title="kappa.lol" tag="2" id="iU3-mI-003"/>
                                         <menuItem title="i.nuuls.com" tag="3" id="iU3-mI-004"/>
@@ -1045,7 +1046,49 @@
                             </popUpButtonCell>
                             <accessibility description="Image Upload Service"/>
                             <connections>
+                                <action selector="onChangedImageUploadService:" target="-2" id="iU3-aC-001"/>
                                 <binding destination="G2Q-fc-ddg" name="selectedTag" keyPath="values.ImageUploadService" id="iU3-bD-001"/>
+                            </connections>
+                        </popUpButton>
+                    </subviews>
+                    <visibilityPriorities>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                    </visibilityPriorities>
+                    <customSpacing>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                    </customSpacing>
+                </stackView>
+                <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="8" horizontalStackHuggingPriority="250" verticalStackHuggingPriority="250" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iU9-sV-rwA">
+                    <rect key="frame" x="42" y="-172" width="300" height="25"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iU7-lB-el1">
+                            <rect key="frame" x="0.0" y="4" width="160" height="16"/>
+                            <textFieldCell key="cell" lineBreakMode="clipping" title="Keep images for:" id="iU7-cE-ll1">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iU8-pU-pbA">
+                            <rect key="frame" x="165" y="0.0" width="110" height="25"/>
+                            <popUpButtonCell key="cell" type="push" title="Forever" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" autoenablesItems="NO" selectedItem="iU8-mI-001" id="iU8-cE-llA">
+                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" usesAppearanceFont="YES"/>
+                                <menu key="menu" title="OtherViews" autoenablesItems="NO" id="iU8-mE-nuA">
+                                    <items>
+                                        <menuItem title="Forever" state="on" id="iU8-mI-001"/>
+                                        <menuItem title="1 hour" tag="1" id="iU8-mI-002"/>
+                                        <menuItem title="12 hours" tag="12" id="iU8-mI-003"/>
+                                        <menuItem title="1 day" tag="24" id="iU8-mI-004"/>
+                                        <menuItem title="3 days" tag="72" id="iU8-mI-005"/>
+                                    </items>
+                                </menu>
+                            </popUpButtonCell>
+                            <accessibility description="Image Retention Period"/>
+                            <connections>
+                                <binding destination="G2Q-fc-ddg" name="selectedTag" keyPath="values.ImageUploadRetentionHours" id="iU8-bD-001"/>
                             </connections>
                         </popUpButton>
                     </subviews>
@@ -1099,7 +1142,11 @@
                 <constraint firstItem="iU6-sV-rwA" firstAttribute="top" secondItem="iU1-eP-arA" secondAttribute="bottom" constant="18" id="iUc-04-aaa"/>
                 <constraint firstItem="iU6-sV-rwA" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="42" id="iUc-05-aaa"/>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="iU6-sV-rwA" secondAttribute="trailing" constant="20" id="iUc-06-aaa"/>
-                <constraint firstAttribute="bottom" secondItem="iU6-sV-rwA" secondAttribute="bottom" constant="30" id="iUc-07-aaa"/>
+                <constraint firstItem="iU9-sV-rwA" firstAttribute="top" secondItem="iU6-sV-rwA" secondAttribute="bottom" constant="10" id="iUc-07-aaa"/>
+                <constraint firstItem="iU9-sV-rwA" firstAttribute="leading" secondItem="iU6-sV-rwA" secondAttribute="leading" id="iUc-08-aaa"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="iU9-sV-rwA" secondAttribute="trailing" constant="20" id="iUc-09-aaa"/>
+                <constraint firstAttribute="bottom" secondItem="iU9-sV-rwA" secondAttribute="bottom" constant="30" id="iUc-10-aaa"/>
+                <constraint firstItem="iU7-lB-el1" firstAttribute="width" secondItem="iU4-lB-el1" secondAttribute="width" id="iUc-11-aaa"/>
             </constraints>
             <point key="canvasLocation" x="318" y="-6756"/>
         </customView>
