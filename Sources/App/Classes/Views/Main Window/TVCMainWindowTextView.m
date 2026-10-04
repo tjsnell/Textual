@@ -47,6 +47,7 @@
 #import "TVCMainWindowTextViewAppearancePrivate.h"
 #import "TVCMainWindowTextViewPrivate.h"
 #import "TXImageUploader.h"
+#import "TXImageUploadCleaner.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -364,11 +365,26 @@ NS_ASSUME_NONNULL_BEGIN
 				return;
 			}
 
+			TXImageUploadService service = (TXImageUploadService)[TPCPreferences imageUploadService];
+
+			NSUInteger retentionHours = [TPCPreferences imageUploadRetentionHours];
+
 			[strongSelf.imageUploader uploadImageData:pngData
 			                                filename:@"image.png"
-			                                 service:(TXImageUploadService)[TPCPreferences imageUploadService]
-			                              completion:^(NSString * _Nullable url, NSError * _Nullable error)
+			                                 service:service
+			                          retentionHours:retentionHours
+			                              completion:^(NSString * _Nullable url,
+			                                           NSString * _Nullable deleteKey,
+			                                           NSError * _Nullable error)
 			{
+				/* The host cannot expire this upload itself, so remember to
+				 delete it. Recorded even if the text view is gone by now. */
+				if (url != nil && deleteKey != nil && retentionHours > 0) {
+					[TXImageUploadCleaner.sharedCleaner deleteUploadWithKey:deleteKey
+					                                                service:service
+					                                                  after:[NSDate dateWithTimeIntervalSinceNow:(retentionHours * 3600.0)]];
+				}
+
 				TVCMainWindowTextView *innerSelf = weakSelf;
 
 				if (innerSelf == nil) {

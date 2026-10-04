@@ -1244,6 +1244,8 @@
 		4CEFEDAC22B4AF42002CEE19 /* TDCPreferencesUserStyleSheetPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4CB873D622B4A497005AB046 /* TDCPreferencesUserStyleSheetPrivate.h */; };
 		4CEFEDB122B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CEFEDAE22B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings */; };
 		4CEFEDB222B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CEFEDAE22B4B6E8002CEE19 /* TDCPreferencesUserStyleSheet.strings */; };
+		41EFFCC5B4AC303BFC38A2B5 /* TXImageUploadCleaner.m in Sources */ = {isa = PBXBuildFile; fileRef = 53757A15B8352BD38302CD99 /* TXImageUploadCleaner.m */; };
+		6CD53A1BC3EDCBDE41373FAE /* TXImageUploadCleaner.m in Sources */ = {isa = PBXBuildFile; fileRef = 53757A15B8352BD38302CD99 /* TXImageUploadCleaner.m */; };
 		89AAE9B6EE3D6C963D83E1A6 /* TXImageUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */; };
 		8B055F09524338F1CB9840AE /* TXURLShortener.m in Sources */ = {isa = PBXBuildFile; fileRef = 6098981ECB506191A2570258 /* TXURLShortener.m */; };
 		A43244781017A1271FD3E595 /* TXImageUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */; };
@@ -1405,6 +1407,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		07A340093F431808B3DA828A /* TXImageUploadCleaner.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = TXImageUploadCleaner.h; sourceTree = "<group>"; };
 		253D97B3988D4A8E0D29A8DD /* TXImageUploader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = TXImageUploader.h; path = TXImageUploader.h; sourceTree = "<group>"; };
 		4593CF3A4A70F78B06E2F99D /* TXURLShortener.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = TXURLShortener.h; sourceTree = "<group>"; };
 		4C06E13A20EC4AC40055D09A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TDCServerPropertiesSheet.xib; sourceTree = "<group>"; };
@@ -2057,6 +2060,7 @@
 		5D9B8EB8170A0EB400919CB0 /* UpdateVersionInfo.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = UpdateVersionInfo.sh; path = "Build Scripts/UpdateVersionInfo.sh"; sourceTree = "<group>"; };
 		5D9B8EB9170A10F200919CB0 /* BuildExtensions.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = BuildExtensions.sh; path = "Build Scripts/BuildExtensions.sh"; sourceTree = "<group>"; };
 		6098981ECB506191A2570258 /* TXURLShortener.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = TXURLShortener.m; sourceTree = "<group>"; };
+		53757A15B8352BD38302CD99 /* TXImageUploadCleaner.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = TXImageUploadCleaner.m; sourceTree = "<group>"; };
 		8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = TXImageUploader.m; path = TXImageUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -2470,6 +2474,7 @@
 				4C31515720EB673E00448776 /* TLOSpeechSynthesizer.m */,
 				4C31515A20EB673E00448776 /* TLOSpokenNotification.m */,
 				4C06E29320EC4F570055D09A /* TLOTimer.m */,
+				53757A15B8352BD38302CD99 /* TXImageUploadCleaner.m */,
 				8881D5848EC8C7DC0CADAF1B /* TXImageUploader.m */,
 				6098981ECB506191A2570258 /* TXURLShortener.m */,
 			);
@@ -2615,6 +2620,7 @@
 				4C31517A20EB673E00448776 /* TXMasterController.h */,
 				4C31519B20EB673E00448776 /* TXMenuController.h */,
 				4C31516B20EB673E00448776 /* TXSharedApplication.h */,
+				07A340093F431808B3DA828A /* TXImageUploadCleaner.h */,
 				253D97B3988D4A8E0D29A8DD /* TXImageUploader.h */,
 				4593CF3A4A70F78B06E2F99D /* TXURLShortener.h */,
 			);
@@ -4817,6 +4823,7 @@
 				4C06E63620EC553A0055D09A /* TVCContentNavigationOutlineView.m in Sources */,
 				4CB873DD22B4A56B005AB046 /* TDCPreferencesUserStyleSheet.m in Sources */,
 				4C06E63720EC553A0055D09A /* TVCDockIcon.m in Sources */,
+				41EFFCC5B4AC303BFC38A2B5 /* TXImageUploadCleaner.m in Sources */,
 				A43244781017A1271FD3E595 /* TXImageUploader.m in Sources */,
 				8B055F09524338F1CB9840AE /* TXURLShortener.m in Sources */,
 			);
@@ -5003,6 +5010,7 @@
 				4C06E6EF20EC55B90055D09A /* TVCContentNavigationOutlineView.m in Sources */,
 				4CB873DE22B4A56B005AB046 /* TDCPreferencesUserStyleSheet.m in Sources */,
 				4C06E6F020EC55B90055D09A /* TVCDockIcon.m in Sources */,
+				6CD53A1BC3EDCBDE41373FAE /* TXImageUploadCleaner.m in Sources */,
 				89AAE9B6EE3D6C963D83E1A6 /* TXImageUploader.m in Sources */,
 				1AA29BA0300F78821DABF772 /* TXURLShortener.m in Sources */,
 			);

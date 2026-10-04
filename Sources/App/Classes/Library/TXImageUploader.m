@@ -23,8 +23,8 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 + (nullable NSURL *)requestURLForService:(TXImageUploadService)service
 {
 	switch (service) {
-		case TXImageUploadServiceCatbox:
-			return [NSURL URLWithString:@"https://catbox.moe/user/api.php"];
+		case TXImageUploadServiceLitterbox:
+			return [NSURL URLWithString:@"https://litterbox.catbox.moe/resources/internals/api.php"];
 		case TXImageUploadServiceX0At:
 			return [NSURL URLWithString:@"https://x0.at/"];
 		case TXImageUploadServiceKappaLol:
@@ -42,7 +42,7 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 + (NSString *)fileFieldNameForService:(TXImageUploadService)service
 {
 	switch (service) {
-		case TXImageUploadServiceCatbox:
+		case TXImageUploadServiceLitterbox:
 			return @"fileToUpload";
 		case TXImageUploadServiceNuuls:
 			return @"attachment";
@@ -56,11 +56,33 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 	return @"file";
 }
 
++ (BOOL)serviceSupportsRetention:(TXImageUploadService)service
+{
+	return (service == TXImageUploadServiceLitterbox ||
+			service == TXImageUploadServiceKappaLol);
+}
+
+/* Litterbox only accepts 1h, 12h, 24h and 72h. Other values round up to the
+ next step; 0 (forever) and anything longer get the 72h maximum. */
++ (NSString *)litterboxTimeForRetentionHours:(NSUInteger)retentionHours
+{
+	if (retentionHours == 0 || retentionHours > 24) {
+		return @"72h";
+	} else if (retentionHours > 12) {
+		return @"24h";
+	} else if (retentionHours > 1) {
+		return @"12h";
+	}
+
+	return @"1h";
+}
+
 /* Caller must pass a header-safe filename (no quotes or CRLF). */
 + (NSData *)multipartBodyForImageData:(NSData *)data
                              filename:(NSString *)filename
                              boundary:(NSString *)boundary
                               service:(TXImageUploadService)service
+                       retentionHours:(NSUInteger)retentionHours
 {
 	NSMutableData *body = [NSMutableData data];
 
@@ -68,10 +90,15 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 		[body appendData:[string dataUsingEncoding:NSUTF8StringEncoding]];
 	};
 
-	if (service == TXImageUploadServiceCatbox) {
+	if (service == TXImageUploadServiceLitterbox) {
 		append([NSString stringWithFormat:@"--%@\r\n", boundary]);
 		append(@"Content-Disposition: form-data; name=\"reqtype\"\r\n\r\n");
 		append(@"fileupload\r\n");
+
+		append([NSString stringWithFormat:@"--%@\r\n", boundary]);
+		append(@"Content-Disposition: form-data; name=\"time\"\r\n\r\n");
+		append([NSString stringWithFormat:@"%@\r\n",
+			[self litterboxTimeForRetentionHours:retentionHours]]);
 	}
 
 	append([NSString stringWithFormat:@"--%@\r\n", boundary]);
@@ -149,6 +176,47 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 	return url;
 }
 
++ (nullable NSString *)deleteKeyFromResponseData:(nullable NSData *)data
+                                         service:(TXImageUploadService)service
+{
+	if (service != TXImageUploadServiceKappaLol || data.length == 0) {
+		return nil;
+	}
+
+	id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+
+	if ([json isKindOfClass:[NSDictionary class]] == NO) {
+		return nil;
+	}
+
+	id key = ((NSDictionary *)json)[@"key"];
+
+	if ([key isKindOfClass:[NSString class]] == NO || [key length] == 0) {
+		return nil;
+	}
+
+	return key;
+}
+
++ (nullable NSURL *)deleteRequestURLForService:(TXImageUploadService)service
+                                     deleteKey:(NSString *)deleteKey
+{
+	if (service != TXImageUploadServiceKappaLol) {
+		return nil;
+	}
+
+	NSURLComponents *components =
+		[NSURLComponents componentsWithString:@"https://kappa.lol/api/delete"];
+
+	NSMutableCharacterSet *allowed = [[NSCharacterSet URLQueryAllowedCharacterSet] mutableCopy];
+	[allowed removeCharactersInString:@"&=+?#"];
+
+	components.percentEncodedQuery = [NSString stringWithFormat:@"key=%@",
+		[deleteKey stringByAddingPercentEncodingWithAllowedCharacters:allowed]];
+
+	return components.URL;
+}
+
 - (NSURLSession *)session
 {
 	if (self->_session == nil) {
@@ -160,11 +228,14 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 - (void)uploadImageData:(NSData *)data
                filename:(NSString *)filename
                 service:(TXImageUploadService)service
-             completion:(void (^)(NSString * _Nullable, NSError * _Nullable))completion
+         retentionHours:(NSUInteger)retentionHours
+             completion:(void (^)(NSString * _Nullable, NSString * _Nullable, NSError * _Nullable))completion
 {
-	void (^finish)(NSString *, NSError *) = ^(NSString * _Nullable url, NSError * _Nullable error) {
+	void (^finish)(NSString *, NSString *, NSError *) =
+		^(NSString * _Nullable url, NSString * _Nullable deleteKey, NSError * _Nullable error)
+	{
 		dispatch_async(dispatch_get_main_queue(), ^{
-			completion(url, error);
+			completion(url, deleteKey, error);
 		});
 	};
 
@@ -174,7 +245,7 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 		NSError *serviceError = nil;
 		TXImageUploaderSetError(&serviceError, TXImageUploaderErrorUnknownService,
 			@"Unknown image upload service");
-		finish(nil, serviceError);
+		finish(nil, nil, serviceError);
 		return;
 	}
 
@@ -187,7 +258,8 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 	request.HTTPBody = [[self class] multipartBodyForImageData:data
 	                                                  filename:filename
 	                                                  boundary:boundary
-	                                                   service:service];
+	                                                   service:service
+	                                            retentionHours:retentionHours];
 
 	NSURLSessionDataTask *task =
 		[self.session dataTaskWithRequest:request
@@ -196,7 +268,7 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 		                                    NSError * _Nullable transportError)
 	{
 		if (transportError != nil) {
-			finish(nil, transportError);
+			finish(nil, nil, transportError);
 			return;
 		}
 
@@ -210,7 +282,13 @@ static NSString * _Nullable TXImageUploaderSetError(NSError * _Nullable * _Nulla
 		                                       statusCode:status
 		                                          service:service
 		                                            error:&parseError];
-		finish(url, url ? nil : parseError);
+
+		if (url == nil) {
+			finish(nil, nil, parseError);
+			return;
+		}
+
+		finish(url, [[self class] deleteKeyFromResponseData:respData service:service], nil);
 	}];
 
 	[task resume];

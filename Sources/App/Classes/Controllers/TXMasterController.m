@@ -64,6 +64,7 @@
 #import "TPCThemeControllerPrivate.h"
 #import "TXMenuControllerPrivate.h"
 #import "TXWindowControllerPrivate.h"
+#import "TXImageUploadCleaner.h"
 #import "TXMasterControllerPrivate.h"
 #import "IRCClient.h"
 
@@ -307,6 +308,19 @@ NS_ASSUME_NONNULL_BEGIN
 	}
 
 	[self.mainWindow maybeToggleFullscreenAfterLaunch];
+
+	[self prepareImageUploadCleaner];
+}
+
+/* Deletes pasted images whose retention period has passed (see
+ TXImageUploadCleaner), including any that fell due while we were not running. */
+- (void)prepareImageUploadCleaner
+{
+	TXImageUploadCleaner *cleaner = [[TXImageUploadCleaner alloc] initWithUserDefaults:RZUserDefaults()];
+
+	TXImageUploadCleaner.sharedCleaner = cleaner;
+
+	[cleaner startMonitoring];
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification
