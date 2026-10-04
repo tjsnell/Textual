@@ -457,6 +457,11 @@ NSUInteger const TPCPreferencesDictionaryVersion = 602;
 	return [RZUserDefaults() unsignedIntegerForKey:@"URLShortenerMinimumLength"];
 }
 
++ (NSUInteger)imageUploadService
+{
+	return [RZUserDefaults() unsignedIntegerForKey:@"ImageUploadService"];
+}
+
 + (NSUInteger)trackUserAwayStatusMaximumChannelSize
 {
 	return [RZUserDefaults() unsignedIntegerForKey:@"TrackUserAwayStatusMaximumChannelSize"];

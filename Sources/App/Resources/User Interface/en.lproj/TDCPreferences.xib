@@ -862,7 +862,7 @@
         </customView>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView translatesAutoresizingMaskIntoConstraints="NO" id="Yrc-pc-3Zr" userLabel="Behavior">
-            <rect key="frame" x="0.0" y="0.0" width="670" height="380"/>
+            <rect key="frame" x="0.0" y="0.0" width="670" height="446"/>
             <subviews>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dcr-ig-DFq">
                     <rect key="frame" x="40" y="225" width="255" height="18"/>
@@ -1014,6 +1014,50 @@
                         <real value="3.4028234663852886e+38"/>
                     </customSpacing>
                 </stackView>
+                <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="iU1-eP-arA">
+                    <rect key="frame" x="40" y="-96" width="590" height="5"/>
+                </box>
+                <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="8" horizontalStackHuggingPriority="250" verticalStackHuggingPriority="250" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iU6-sV-rwA">
+                    <rect key="frame" x="42" y="-137" width="400" height="25"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iU4-lB-el1">
+                            <rect key="frame" x="0.0" y="4" width="160" height="16"/>
+                            <textFieldCell key="cell" lineBreakMode="clipping" title="Upload pasted images to:" id="iU4-cE-ll1">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iU3-pU-pbA">
+                            <rect key="frame" x="165" y="0.0" width="220" height="25"/>
+                            <popUpButtonCell key="cell" type="push" title="catbox.moe" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" selectedItem="iU3-mI-001" id="iU3-cE-llA">
+                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" usesAppearanceFont="YES"/>
+                                <menu key="menu" title="OtherViews" id="iU3-mE-nuA">
+                                    <items>
+                                        <menuItem title="catbox.moe" state="on" id="iU3-mI-001"/>
+                                        <menuItem title="x0.at (kept up to 100 days)" tag="1" id="iU3-mI-002"/>
+                                        <menuItem title="kappa.lol" tag="2" id="iU3-mI-003"/>
+                                        <menuItem title="i.nuuls.com" tag="3" id="iU3-mI-004"/>
+                                        <menuItem title="uguu.se (kept 3 hours)" tag="4" id="iU3-mI-005"/>
+                                    </items>
+                                </menu>
+                            </popUpButtonCell>
+                            <accessibility description="Image Upload Service"/>
+                            <connections>
+                                <binding destination="G2Q-fc-ddg" name="selectedTag" keyPath="values.ImageUploadService" id="iU3-bD-001"/>
+                            </connections>
+                        </popUpButton>
+                    </subviews>
+                    <visibilityPriorities>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                    </visibilityPriorities>
+                    <customSpacing>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                    </customSpacing>
+                </stackView>
             </subviews>
             <constraints>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="xKd-AN-3BU" secondAttribute="trailing" constant="20" id="0fF-fv-xsc"/>
@@ -1049,7 +1093,13 @@
                 <constraint firstItem="uS6-sV-rwA" firstAttribute="top" secondItem="uS2-cB-oxA" secondAttribute="bottom" constant="14" id="uSc-07-aaa"/>
                 <constraint firstItem="uS6-sV-rwA" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="62" id="uSc-08-aaa"/>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="uS6-sV-rwA" secondAttribute="trailing" constant="20" id="uSc-09-aaa"/>
-                <constraint firstAttribute="bottom" secondItem="uS6-sV-rwA" secondAttribute="bottom" constant="30" id="uSc-10-aaa"/>
+                <constraint firstItem="iU1-eP-arA" firstAttribute="top" secondItem="uS6-sV-rwA" secondAttribute="bottom" constant="18" id="iUc-01-aaa"/>
+                <constraint firstItem="iU1-eP-arA" firstAttribute="leading" secondItem="Fmc-YR-xfp" secondAttribute="leading" id="iUc-02-aaa"/>
+                <constraint firstItem="iU1-eP-arA" firstAttribute="trailing" secondItem="Fmc-YR-xfp" secondAttribute="trailing" id="iUc-03-aaa"/>
+                <constraint firstItem="iU6-sV-rwA" firstAttribute="top" secondItem="iU1-eP-arA" secondAttribute="bottom" constant="18" id="iUc-04-aaa"/>
+                <constraint firstItem="iU6-sV-rwA" firstAttribute="leading" secondItem="Yrc-pc-3Zr" secondAttribute="leading" constant="42" id="iUc-05-aaa"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="iU6-sV-rwA" secondAttribute="trailing" constant="20" id="iUc-06-aaa"/>
+                <constraint firstAttribute="bottom" secondItem="iU6-sV-rwA" secondAttribute="bottom" constant="30" id="iUc-07-aaa"/>
             </constraints>
             <point key="canvasLocation" x="318" y="-6756"/>
         </customView>
